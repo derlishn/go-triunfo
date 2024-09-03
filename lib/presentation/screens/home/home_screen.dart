@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_triunfo/presentation/viewmodels/auth_viewmodel.dart';
 
+import '../../../data/providers/auth_providers.dart';
+
 class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -2,37 +2,62 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 class AppTheme {
+  static const TextTheme lightTextTheme = TextTheme(
+    displayLarge: TextStyle(
+      fontSize: 32,
+      fontWeight: FontWeight.bold,
+      color: AppColors.primaryOrange,
+    ),
+    bodyLarge: TextStyle(
+      fontSize: 18,
+      color: AppColors.black,
+    ),
+    bodyMedium: TextStyle(
+      fontSize: 16,
+      color: AppColors.black,
+    ),
+    titleMedium: TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: AppColors.white,
+    ),
+  );
+
+  static const TextTheme darkTextTheme = TextTheme(
+    displayLarge: TextStyle(
+      fontSize: 32,
+      fontWeight: FontWeight.bold,
+      color: AppColors.darkPrimary,
+    ),
+    bodyLarge: TextStyle(
+      fontSize: 18,
+      color: AppColors.white,
+    ),
+    bodyMedium: TextStyle(
+      fontSize: 16,
+      color: AppColors.white,
+    ),
+    titleMedium: TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: AppColors.darkOnPrimary,
+    ),
+  );
+
   static ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
     primaryColor: AppColors.primaryOrange,
     scaffoldBackgroundColor: AppColors.white,
     appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.primaryOrange,
-      iconTheme: IconThemeData(color: AppColors.white),
+      iconTheme: IconThemeData(color: AppColors.black),
       titleTextStyle: TextStyle(
         color: AppColors.white,
         fontSize: 20,
         fontWeight: FontWeight.bold,
       ),
     ),
-    buttonTheme: const ButtonThemeData(
-      buttonColor: AppColors.primaryOrange,
-      textTheme: ButtonTextTheme.primary,
-    ),
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.primaryOrange,
-      ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primaryOrange,
-        side: const BorderSide(color: AppColors.primaryOrange),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-      ),
-    ),
+    textTheme: lightTextTheme,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primaryOrange,
@@ -67,24 +92,7 @@ class AppTheme {
         fontWeight: FontWeight.bold,
       ),
     ),
-    buttonTheme: const ButtonThemeData(
-      buttonColor: AppColors.darkPrimary,
-      textTheme: ButtonTextTheme.primary,
-    ),
-    textButtonTheme: TextButtonThemeData(
-      style: TextButton.styleFrom(
-        foregroundColor: AppColors.darkPrimary,
-      ),
-    ),
-    outlinedButtonTheme: OutlinedButtonThemeData(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.darkPrimary,
-        side: const BorderSide(color: AppColors.darkPrimary),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30),
-        ),
-      ),
-    ),
+    textTheme: darkTextTheme,
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.darkPrimary,

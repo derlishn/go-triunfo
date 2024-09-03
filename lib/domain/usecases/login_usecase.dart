@@ -1,14 +1,22 @@
-import 'package:go_triunfo/data/repositories/auth_repository.dart';
-import 'package:go_triunfo/domain/models/user_model.dart';
+import '../../data/repositories/auth_repository.dart';
+import '../../data/repositories/user_repository.dart';
+import '../models/user_model.dart';
 
 class LoginUseCase {
-  final AuthRepository _repository;
+  final AuthRepository _authRepository;
+  final UserRepository _userRepository;
 
-  LoginUseCase(this._repository);
+  LoginUseCase(this._authRepository, this._userRepository);
 
-  Future<UserModel?> execute(String email, String password) async {
-    final user = await _repository.signInWithEmailAndPassword(email, password);
-    if (user == null) return null;
-    return UserModel(id: user.uid, email: user.email!, displayName: user.displayName);
+  Future<UserModel?> login(String email, String password) async {
+    try {
+      final user = await _authRepository.signInWithEmailAndPassword(email, password);
+      if (user != null) {
+        return await _userRepository.getUserByUid(user.uid);
+      }
+    } catch (e) {
+      print('Error en el login: $e');
+    }
+    return null;
   }
 }

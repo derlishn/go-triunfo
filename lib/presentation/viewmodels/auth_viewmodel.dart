@@ -1,62 +1,129 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_triunfo/data/providers/auth_providers.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_triunfo/domain/models/user_model.dart';
 import 'package:go_triunfo/domain/usecases/login_usecase.dart';
 import 'package:go_triunfo/domain/usecases/register_usecase.dart';
 import 'package:go_triunfo/domain/usecases/logout_usecase.dart';
 import 'package:go_triunfo/domain/usecases/google_sign_in_usecase.dart';
+import 'package:go_triunfo/domain/usecases/user_management_usecase.dart';
+import 'package:go_triunfo/presentation/viewmodels/auth_state.dart';
 
-
-// ViewModel que maneja el estado de autenticación
-class AuthViewModel extends StateNotifier<UserModel?> {
+class AuthViewModel extends StateNotifier<AuthState> {
   final LoginUseCase _loginUseCase;
   final RegisterUseCase _registerUseCase;
   final LogoutUseCase _logoutUseCase;
   final GoogleSignInUseCase _googleSignInUseCase;
+  final UserManagementUseCase _userManagementUseCase;
 
   AuthViewModel(
       this._loginUseCase,
       this._registerUseCase,
       this._logoutUseCase,
       this._googleSignInUseCase,
-      ) : super(null);
+      this._userManagementUseCase,
+      ) : super(AuthState());
 
-  // Método para iniciar sesión con email y contraseña
   Future<void> login(String email, String password) async {
-    state = await _loginUseCase.execute(email, password);
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final user = await _loginUseCase.execute(email, password);
+      if (user != null) {
+        final userModel = await _userManagementUseCase.getUserById(user.uid);
+        state = state.copyWith(user: userModel, isLoading: false);
+      } else {
+        state = state.copyWith(errorMessage: "Usuario no encontrado.", isLoading: false);
+      }
+    } on FirebaseAuthException catch (e) {
+      state = state.copyWith(
+        errorMessage: _mapFirebaseAuthErrorToMessage(e.code),
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Error inesperado. Inténtalo de nuevo.',
+        isLoading: false,
+      );
+    }
   }
 
-  // Método para registrar un nuevo usuario con email y contraseña
-  Future<void> register(String email, String password) async {
-    state = await _registerUseCase.execute(email, password);
+  Future<void> register(String email, String password, String displayName, String gender) async {
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final user = await _registerUseCase.execute(email, password, displayName, gender);
+      if (user != null) {
+        final userModel = UserModel(
+          uid: user.uid,
+          email: email,
+          displayName: displayName,
+          role: 'usuario',
+          isActive: true,
+          createdAt: DateTime.now(),
+          gender: gender,
+        );
+        await _userManagementUseCase.createUser(userModel);
+        state = state.copyWith(user: userModel, isLoading: false);
+      }
+    } on FirebaseAuthException catch (e) {
+      state = state.copyWith(
+        errorMessage: _mapFirebaseAuthErrorToMessage(e.code),
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Error inesperado. Inténtalo de nuevo.',
+        isLoading: false,
+      );
+    }
   }
 
-  // Método para cerrar sesión
   Future<void> signOut() async {
     await _logoutUseCase.execute();
-    state = null;
+    state = AuthState();
   }
 
-  // Método para iniciar sesión con Google
   Future<void> signInWithGoogle() async {
-    state = await _googleSignInUseCase.execute();
+    state = state.copyWith(isLoading: true, errorMessage: null);
+    try {
+      final user = await _googleSignInUseCase.execute();
+      if (user != null) {
+        final userModel = await _userManagementUseCase.getUserById(user.uid);
+        state = state.copyWith(user: userModel, isLoading: false);
+      } else {
+        state = state.copyWith(errorMessage: "Usuario no encontrado.", isLoading: false);
+      }
+    } on FirebaseAuthException catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Error al iniciar sesión con Google.',
+        isLoading: false,
+      );
+    } catch (e) {
+      state = state.copyWith(
+        errorMessage: 'Error inesperado. Inténtalo de nuevo.',
+        isLoading: false,
+      );
+    }
   }
 
-  // Método para escuchar cambios en el estado de autenticación
-  Stream<UserModel?> authStateChanges() {
-    return _googleSignInUseCase.authStateChanges().map((user) {
-      if (user == null) return null;
-      return UserModel(id: user.uid, email: user.email!, displayName: user.displayName);
-    });
+  Future<void> resetPassword(String email) async {
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      state = state.copyWith(errorMessage: 'Error al enviar el correo de recuperación.');
+    }
+  }
+
+  String _mapFirebaseAuthErrorToMessage(String code) {
+    switch (code) {
+      case 'user-not-found':
+        return 'Usuario no encontrado.';
+      case 'wrong-password':
+        return 'Contraseña incorrecta.';
+      case 'email-already-in-use':
+        return 'Este correo ya está en uso.';
+      case 'weak-password':
+        return 'La contraseña es demasiado débil.';
+      default:
+        return 'Ha ocurrido un error. Inténtalo de nuevo.';
+    }
   }
 }
-
-// Proveedor del ViewModel de autenticación
-final authProvider = StateNotifierProvider<AuthViewModel, UserModel?>((ref) {
-  final loginUseCase = ref.read(loginUseCaseProvider);
-  final registerUseCase = ref.read(registerUseCaseProvider);
-  final logoutUseCase = ref.read(logoutUseCaseProvider);
-  final googleSignInUseCase = ref.read(googleSignInUseCaseProvider);
-
-  return AuthViewModel(loginUseCase, registerUseCase, logoutUseCase, googleSignInUseCase);
-});

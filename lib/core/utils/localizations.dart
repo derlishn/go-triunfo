@@ -1,14 +1,24 @@
-// lib/core/localizations.dart
-
 class AppLocalizations {
   // Textos para la pantalla de autenticación
   static const String loginButtonText = "Iniciar Sesión";
   static const String registerButtonText = "Registrarse";
   static const String welcomeText = "Bienvenido a GoTriunfo";
-  static const String forgotPassword = "¿Olvidaste tu contraseña?";
+  static const String forgotPasswordText = "¿Olvidaste tu contraseña?";
   static const String emailHintText = "Correo Electrónico";
   static const String passwordHintText = "Contraseña";
   static const String confirmPasswordHintText = "Confirmar Contraseña";
+
+  // Textos para la pantalla de registro
+  static const String registerHeader = "Crea tu cuenta.";
+  static const String registerSubHeader = "Por favor, completa la información para registrarte";
+  static const String displayNameHintText = "Nombre completo";
+  static const String genderHintText = "Selecciona tu género";
+  static const String maleGenderText = "Hombre";
+  static const String femaleGenderText = "Mujer";
+  static const String otherGenderText = "Otro";
+  static const String alreadyHaveAccountText = "¿Ya tienes una cuenta? ";
+  static const String loginNowText = "Inicia sesión";
+  static const String signInNowText = "Inicia sesión ahora";
 
   // Textos generales para la aplicación
   static const String appName = "GoTriunfo";
@@ -19,4 +29,11 @@ class AppLocalizations {
   // Otros textos reutilizables
   static const String submitButtonText = "Enviar";
   static const String cancelButtonText = "Cancelar";
+
+  // Textos adicionales para la pantalla de inicio de sesión
+  static const String loginHeader = "Inicia sesión en tu cuenta.";
+  static const String loginSubHeader = "Por favor, ingresa a tu cuenta";
+  static const String orSignInWithText = "O inicia sesión con";
+  static const String dontHaveAccountText = "¿No tienes una cuenta? ";
+  static const String registerNowText = "Regístrate";
 }

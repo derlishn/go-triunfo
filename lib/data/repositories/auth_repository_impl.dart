@@ -1,12 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_triunfo/domain/models/user_model.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final FirebaseAuth _firebaseAuth;
   final GoogleSignIn _googleSignIn;
+  final FirebaseFirestore _firestore;  // Agregando el tercer argumento
 
-  AuthRepositoryImpl(this._firebaseAuth, this._googleSignIn);
+  AuthRepositoryImpl(this._firebaseAuth, this._googleSignIn, this._firestore);
 
   @override
   Future<User?> signInWithEmailAndPassword(String email, String password) async {
@@ -15,9 +18,15 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<User?> createUserWithEmailAndPassword(String email, String password) async {
+  Future<User?> createUserWithEmailAndPassword(String email, String password, UserModel userModel) async {
     final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
-    return userCredential.user;
+    final User? user = userCredential.user;
+
+    if (user != null) {
+      // Guardar los datos adicionales en Firestore
+      await _firestore.collection('users').doc(user.uid).set(userModel.toMap());
+    }
+    return user;
   }
 
   @override
