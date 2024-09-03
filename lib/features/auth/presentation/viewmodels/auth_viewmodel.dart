@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:go_triunfo/domain/models/user_model.dart';
+import 'package:go_triunfo/data/services/auth_providers.dart';
 import 'package:go_triunfo/domain/usecases/login_usecase.dart';
 import 'package:go_triunfo/domain/usecases/register_usecase.dart';
 import 'package:go_triunfo/domain/usecases/logout_usecase.dart';
 import 'package:go_triunfo/domain/usecases/google_sign_in_usecase.dart';
 import 'package:go_triunfo/domain/usecases/user_management_usecase.dart';
-import 'package:go_triunfo/presentation/viewmodels/auth_state.dart';
+import 'auth_state.dart';
 
 class AuthViewModel extends StateNotifier<AuthState> {
   final LoginUseCase _loginUseCase;
@@ -22,6 +22,10 @@ class AuthViewModel extends StateNotifier<AuthState> {
       this._googleSignInUseCase,
       this._userManagementUseCase,
       ) : super(AuthState());
+
+  bool isAuthenticated() {
+    return state.user != null;
+  }
 
   Future<void> login(String email, String password) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
@@ -46,22 +50,13 @@ class AuthViewModel extends StateNotifier<AuthState> {
     }
   }
 
-  Future<void> register(String email, String password, String displayName, String gender) async {
+  Future<void> register(
+      String email, String password, String displayName, String gender) async {
     state = state.copyWith(isLoading: true, errorMessage: null);
     try {
       final user = await _registerUseCase.execute(email, password, displayName, gender);
       if (user != null) {
-        final userModel = UserModel(
-          uid: user.uid,
-          email: email,
-          displayName: displayName,
-          role: 'usuario',
-          isActive: true,
-          createdAt: DateTime.now(),
-          gender: gender,
-        );
-        await _userManagementUseCase.createUser(userModel);
-        state = state.copyWith(user: userModel, isLoading: false);
+        state = state.copyWith(user: user, isLoading: false);
       }
     } on FirebaseAuthException catch (e) {
       state = state.copyWith(
@@ -112,6 +107,10 @@ class AuthViewModel extends StateNotifier<AuthState> {
     }
   }
 
+  void togglePasswordVisibility() {
+    state = state.copyWith(isPasswordVisible: !state.isPasswordVisible);
+  }
+
   String _mapFirebaseAuthErrorToMessage(String code) {
     switch (code) {
       case 'user-not-found':
@@ -127,3 +126,19 @@ class AuthViewModel extends StateNotifier<AuthState> {
     }
   }
 }
+
+final authProvider = StateNotifierProvider<AuthViewModel, AuthState>((ref) {
+  final loginUseCase = ref.read(loginUseCaseProvider);
+  final registerUseCase = ref.read(registerUseCaseProvider);
+  final logoutUseCase = ref.read(logoutUseCaseProvider);
+  final googleSignInUseCase = ref.read(googleSignInUseCaseProvider);
+  final userManagementUseCase = ref.read(userManagementUseCaseProvider);
+
+  return AuthViewModel(
+    loginUseCase,
+    registerUseCase,
+    logoutUseCase,
+    googleSignInUseCase,
+    userManagementUseCase,
+  );
+});

@@ -1,4 +1,4 @@
-import '../../domain/models/user_model.dart';
+import 'package:go_triunfo/data/models/user_model.dart';
 
 class AuthState {
   final UserModel? user;
@@ -6,9 +6,19 @@ class AuthState {
   final bool isLoading;
   final bool isPasswordVisible;
 
-  AuthState({this.user, this.errorMessage, this.isLoading = false, this.isPasswordVisible = false});
+  AuthState({
+    this.user,
+    this.errorMessage,
+    this.isLoading = false,
+    this.isPasswordVisible = false,
+  });
 
-  AuthState copyWith({UserModel? user, String? errorMessage, bool? isLoading, bool? isPasswordVisible}) {
+  AuthState copyWith({
+    UserModel? user,
+    String? errorMessage,
+    bool? isLoading,
+    bool? isPasswordVisible,
+  }) {
     return AuthState(
       user: user ?? this.user,
       errorMessage: errorMessage ?? this.errorMessage,

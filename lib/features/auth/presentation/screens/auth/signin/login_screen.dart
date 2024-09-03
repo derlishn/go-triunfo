@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_triunfo/core/utils/localizations.dart';
-import 'package:go_triunfo/presentation/screens/auth/signin/widgets/loginForm.dart';
-import 'package:go_triunfo/presentation/screens/auth/signin/widgets/signUpPrompt.dart';
-import 'package:go_triunfo/presentation/screens/auth/signin/widgets/socialLoginButtons.dart';
+import 'package:go_triunfo/features/auth/presentation/screens/auth/signin/widgets/loginForm.dart';
+import 'package:go_triunfo/features/auth/presentation/screens/auth/signin/widgets/signUpPrompt.dart';
+import 'package:go_triunfo/features/auth/presentation/screens/auth/signin/widgets/socialLoginButtons.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});

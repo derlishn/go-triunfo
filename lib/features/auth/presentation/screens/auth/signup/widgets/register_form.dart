@@ -3,8 +3,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:go_triunfo/core/utils/localizations.dart';
 import 'package:go_triunfo/core/utils/validators.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-import '../../../../../data/providers/auth_providers.dart';
+import '../../../../viewmodels/auth_viewmodel.dart';
+import '../../../../viewmodels/password_visibility_notifier.dart';
+import '../../../home/home_screen.dart';
 
 class RegisterForm extends HookConsumerWidget {
   const RegisterForm({super.key});
@@ -16,7 +17,7 @@ class RegisterForm extends HookConsumerWidget {
     final passwordController = useTextEditingController();
     final genderController = useState<String?>('Male');
     final authViewModel = ref.read(authProvider.notifier);
-
+    final authState = ref.watch(authProvider);
     final formKey = GlobalKey<FormState>();
 
     return Form(
@@ -57,13 +58,20 @@ class RegisterForm extends HookConsumerWidget {
           const SizedBox(height: 20),
           TextFormField(
             controller: passwordController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: AppLocalizations.passwordHintText,
-              labelStyle: TextStyle(fontSize: 16),
-              border: OutlineInputBorder(),
-              suffixIcon: Icon(Icons.visibility_off),
+              labelStyle: const TextStyle(fontSize: 16),
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  authState.isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: () {
+                  ref.read(passwordVisibilityProvider.notifier).toggleVisibility();
+                },
+              ),
             ),
-            obscureText: true,
+            obscureText: !authState.isPasswordVisible,
             validator: Validators.validatePassword,
           ),
           const SizedBox(height: 20),
@@ -92,7 +100,20 @@ class RegisterForm extends HookConsumerWidget {
                   displayNameController.text,
                   genderController.value!,
                 );
-                Navigator.pushReplacementNamed(context, '/home');
+
+                if (authState.errorMessage != null) {
+                  // Muestra el error si el registro falla
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(authState.errorMessage!)),
+                  );
+                } else {
+                  // Si el registro es exitoso, navega a la pantalla de home sin usar rutas
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const HomeScreen(),
+                    ),
+                  );
+                }
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -108,6 +129,11 @@ class RegisterForm extends HookConsumerWidget {
             ),
             child: const Text(AppLocalizations.registerButtonText),
           ),
+          if (authState.isLoading)
+            const Padding(
+              padding: EdgeInsets.only(top: 16),
+              child: Center(child: CircularProgressIndicator()),
+            ), // Animación de carga
         ],
       ),
     );

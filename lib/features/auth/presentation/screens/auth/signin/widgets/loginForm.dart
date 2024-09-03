@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:go_triunfo/presentation/screens/auth/signin/forgotPasswordScreen.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:go_triunfo/core/utils/localizations.dart';
 import 'package:go_triunfo/core/utils/validators.dart';
-import 'package:go_triunfo/data/providers/auth_providers.dart';
+
+import '../../../../viewmodels/auth_viewmodel.dart';
+import '../../../../viewmodels/password_visibility_notifier.dart';
+import '../../../home/home_screen.dart';
+import '../forgotPasswordScreen.dart';
 
 class LoginForm extends HookConsumerWidget {
   const LoginForm({super.key});
@@ -90,7 +93,12 @@ class LoginForm extends HookConsumerWidget {
                   );
                 } else {
                   // Si la autenticación es exitosa, navega a la pantalla de home
-                  Navigator.pushReplacementNamed(context, '/home');
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const HomeScreen(),
+                    ),
+                  );
                 }
               } else {
                 // Mostrar Snackbar si hay errores en el formulario

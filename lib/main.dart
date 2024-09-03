@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:go_triunfo/core/theme/app_theme.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:go_triunfo/app/routes.dart';
 import 'package:go_triunfo/firebase_options.dart';
+import 'features/auth/presentation/screens/home/home_screen.dart';
+import 'features/auth/presentation/screens/welcome/welcome_screen.dart';
+import 'features/auth/presentation/viewmodels/auth_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,19 +20,21 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authViewModel = ref.read(authProvider.notifier);
+    final isAuthenticated = authViewModel.isAuthenticated();
+
     return MaterialApp(
       title: 'GoTriunfo App',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      initialRoute: '/',
-      onGenerateRoute: AppRoutes.generateRoute,
+      home: isAuthenticated ? HomeScreen() : const WelcomeScreen(),
     );
   }
 }

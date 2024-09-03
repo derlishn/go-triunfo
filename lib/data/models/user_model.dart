@@ -1,3 +1,5 @@
+// lib/domain/models/user_model.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
@@ -21,7 +23,7 @@ class UserModel {
     required this.createdAt,
   });
 
-  // Método para convertir el UserModel a un Map (usado para guardar en Firestore)
+  // Convert UserModel to a Map (for Firestore storage)
   Map<String, dynamic> toMap() {
     return {
       'uid': uid,
@@ -35,7 +37,7 @@ class UserModel {
     };
   }
 
-  // Método para crear un UserModel desde un Map (usado para leer de Firestore)
+  // Create a UserModel from a Map (for reading from Firestore)
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
       uid: map['uid'] ?? '',
@@ -49,7 +51,7 @@ class UserModel {
     );
   }
 
-  // Método copyWith para crear una nueva instancia de UserModel con cambios específicos
+  // Method to update UserModel properties (copyWith)
   UserModel copyWith({
     String? uid,
     String? email,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_triunfo/core/utils/localizations.dart';
+import '../../signup/register_screen.dart';
 
 class SignUpPrompt extends StatelessWidget {
   const SignUpPrompt({super.key});
@@ -8,7 +9,10 @@ class SignUpPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () {
-        Navigator.pushNamed(context, '/register');
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const RegisterScreen()),
+        );
       },
       child: Text.rich(
         TextSpan(
@@ -19,7 +23,7 @@ class SignUpPrompt extends StatelessWidget {
               text: AppLocalizations.registerNowText,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
-                fontWeight: FontWeight.bold, // Añadir negrita para destacar "Register Now"
+                fontWeight: FontWeight.bold, // Añadir negrita para destacar "Regístrate Ahora"
               ),
             ),
           ],

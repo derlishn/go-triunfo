@@ -1,11 +1,11 @@
 import 'package:go_triunfo/data/repositories/auth_repository.dart';
 
 class LogoutUseCase {
-  final AuthRepository _repository;
+  final AuthRepository _authRepository;
 
-  LogoutUseCase(this._repository);
+  LogoutUseCase(this._authRepository);
 
   Future<void> execute() async {
-    await _repository.signOut();
+    await _authRepository.signOut();
   }
 }

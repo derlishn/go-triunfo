@@ -1,5 +1,7 @@
+// lib/data/repositories/user_repository_impl.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:go_triunfo/domain/models/user_model.dart';
+import 'package:go_triunfo/data/models/user_model.dart';
 import 'user_repository.dart';
 
 class UserRepositoryImpl implements UserRepository {
@@ -17,7 +19,7 @@ class UserRepositoryImpl implements UserRepository {
   }
 
   @override
-  Future<UserModel?> getUserByUID(String uid) async {
+  Future<UserModel?> getUserById(String uid) async {
     try {
       final doc = await _firestore.collection('users').doc(uid).get();
       if (doc.exists) {

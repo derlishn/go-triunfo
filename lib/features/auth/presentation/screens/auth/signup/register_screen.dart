@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_triunfo/presentation/screens/auth/signup/widgets/signInPrompt.dart';
+import 'package:go_triunfo/features/auth/presentation/screens/auth/signup/widgets/signInPrompt.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'widgets/register_form.dart';
 
