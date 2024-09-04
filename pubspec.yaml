@@ -13,12 +13,16 @@ dependencies:
   cloud_firestore: ^5.3.0
   firebase_auth: ^5.2.0
   firebase_core: ^3.4.0
+  firebase_storage: ^12.2.0
+  image_picker: ^1.1.2
   google_sign_in: ^6.2.1
   flutter_hooks: ^0.20.5
   hooks_riverpod: ^2.0.0
+  shared_preferences: ^2.2.3
   get_it: ^7.7.0
   equatable: ^2.0.5
   flutter_svg: ^2.0.10+1
+  dartz: ^0.10.1
 
 
 dev_dependencies:

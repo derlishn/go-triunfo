@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_triunfo/core/resources/strings.dart';
+import 'package:go_triunfo/core/utils/navigation/navigator_helper.dart';
+import 'package:go_triunfo/feature/auth/presentation/screens/login_screen.dart';
+import 'package:go_triunfo/feature/auth/presentation/screens/register_screen.dart';
 
 class AuthButtons extends StatelessWidget {
   const AuthButtons({super.key});
@@ -11,7 +14,9 @@ class AuthButtons extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0),
           child: FilledButton(
-            onPressed: () {},
+            onPressed: () {
+              navigateTo(context, const LoginScreen());
+            },
             style: FilledButton.styleFrom(
               foregroundColor: Colors.white,
               backgroundColor: Theme.of(context).colorScheme.primary,
@@ -32,7 +37,9 @@ class AuthButtons extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0),
           child: OutlinedButton(
-            onPressed: () {},
+            onPressed: () {
+              navigateTo(context, const RegisterScreen());
+            },
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.white,
               backgroundColor: Colors.red,
