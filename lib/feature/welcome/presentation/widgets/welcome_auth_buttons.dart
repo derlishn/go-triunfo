@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_triunfo/core/utils/localizations.dart';
+import 'package:go_triunfo/core/resources/strings.dart';
 
 class AuthButtons extends StatelessWidget {
   const AuthButtons({super.key});
@@ -11,9 +11,7 @@ class AuthButtons extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0),
           child: FilledButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/login');
-            },
+            onPressed: () {},
             style: FilledButton.styleFrom(
               foregroundColor: Colors.white,
               backgroundColor: Theme.of(context).colorScheme.primary,
@@ -21,11 +19,12 @@ class AuthButtons extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
-              textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textStyle:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             child: const SizedBox(
               width: double.infinity,
-              child: Center(child: Text(AppLocalizations.loginButtonText)),
+              child: Center(child: Text(AppStrings.loginButtonText)),
             ),
           ),
         ),
@@ -33,9 +32,7 @@ class AuthButtons extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0),
           child: OutlinedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/register');
-            },
+            onPressed: () {},
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.white,
               backgroundColor: Colors.red,
@@ -44,11 +41,12 @@ class AuthButtons extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
-              textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textStyle:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             child: const SizedBox(
               width: double.infinity,
-              child: Center(child: Text(AppLocalizations.registerButtonText)),
+              child: Center(child: Text(AppStrings.registerButtonText)),
             ),
           ),
         ),

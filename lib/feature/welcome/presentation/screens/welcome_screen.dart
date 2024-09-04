@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'widgets/welcome_background.dart';
-import 'widgets/welcome_logo.dart';
-import 'widgets/auth_buttons.dart';
+import 'package:go_triunfo/feature/welcome/presentation/widgets/welcome_auth_buttons.dart';
+import 'package:go_triunfo/feature/welcome/presentation/widgets/welcome_background.dart';
+import 'package:go_triunfo/feature/welcome/presentation/widgets/welcome_logo.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});

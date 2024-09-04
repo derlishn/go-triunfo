@@ -1,4 +1,4 @@
-class AppLocalizations {
+class AppStrings {
   // Textos para la pantalla de autenticación
   static const String loginButtonText = "Iniciar Sesión";
   static const String registerButtonText = "Registrarse";
@@ -10,7 +10,8 @@ class AppLocalizations {
 
   // Textos para la pantalla de registro
   static const String registerHeader = "Crea tu cuenta.";
-  static const String registerSubHeader = "Por favor, completa la información para registrarte";
+  static const String registerSubHeader =
+      "Por favor, completa la información para registrarte";
   static const String displayNameHintText = "Nombre completo";
   static const String genderHintText = "Selecciona tu género";
   static const String maleGenderText = "Hombre";
@@ -23,7 +24,8 @@ class AppLocalizations {
   // Textos generales para la aplicación
   static const String appName = "GoTriunfo";
   static const String logoutButtonText = "Cerrar Sesión";
-  static const String errorMessage = "Ha ocurrido un error. Por favor, inténtelo de nuevo.";
+  static const String errorMessage =
+      "Ha ocurrido un error. Por favor, inténtelo de nuevo.";
   static const String noInternetConnection = "Sin conexión a Internet";
 
   // Otros textos reutilizables
