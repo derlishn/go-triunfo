@@ -1,318 +1,224 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:go_triunfo/core/utils/navigation/navigator_helper.dart';
-import 'package:go_triunfo/feature/auth/presentation/widgets/profile_picture_selector_widget.dart';
-import 'package:go_triunfo/feature/home/presentation/screens/home_screen.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:go_triunfo/core/resources/strings.dart';
 import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:go_triunfo/core/resources/strings.dart';
+import 'package:go_triunfo/core/utils/helpers/validators.dart';
+import 'package:go_triunfo/core/utils/widgets/showCustomSnackBar.dart';
+import 'package:go_triunfo/core/utils/navigation/navigator_helper.dart';
+import 'package:go_triunfo/feature/home/presentation/screens/home_screen.dart';
 
-class RegisterForm extends ConsumerStatefulWidget {
+class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
 
   @override
-  ConsumerState<RegisterForm> createState() => _RegisterFormState();
+  _RegisterFormState createState() => _RegisterFormState();
 }
 
-class _RegisterFormState extends ConsumerState<RegisterForm> {
-  final displayNameController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
-  final genderController = ValueNotifier<String>(AppStrings.maleGenderText);
-  bool isPasswordVisible = false;
-  bool isConfirmPasswordVisible = false;
-  String? displayNameError;
-  String? emailError;
-  String? passwordError;
-  String? confirmPasswordError;
-  String? _uploadedImageUrl;
-
-  // Validación del correo
-  bool _isValidEmail(String email) {
-    final emailRegex = RegExp(
-        r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-    return emailRegex.hasMatch(email);
-  }
-
-  // Muestra el diálogo de progreso
-  Future<void> _showProgressDialog(BuildContext context, String message) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        return AlertDialog(
-          content: Row(
-            children: [
-              const CircularProgressIndicator(),
-              const SizedBox(width: 20),
-              Expanded(child: Text(message)),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Actualiza el diálogo de progreso
-  Future<void> _updateProgressDialog(
-      BuildContext context, String message) async {
-    Navigator.pop(context); // Cierra el diálogo actual
-    await _showProgressDialog(
-        context, message); // Abre uno nuevo con el mensaje actualizado
-  }
-
-  // Método para el registro del usuario
-  void _signUp(AuthViewModel authViewModel) async {
-    setState(() {
-      displayNameError = null;
-      emailError = null;
-      passwordError = null;
-      confirmPasswordError = null;
-    });
-
-    // Validaciones
-    if (!_validateForm()) return;
-
-    await _showProgressDialog(context, "Preparando todo...");
-
-    if (_uploadedImageUrl != null) {
-      await _updateProgressDialog(context, "Subiendo tu foto...");
-    }
-
-    Navigator.pop(context); // Cierra el diálogo
-
-    // Crear el usuario
-    await authViewModel.signUp(
-      email: emailController.text,
-      password: passwordController.text,
-      displayName: displayNameController.text,
-      gender: genderController.value,
-      photoUrl: _uploadedImageUrl, // URL de la imagen subida
-    );
-
-    // Validar si hubo errores
-    if (authViewModel.errorMessage != null) {
-      _handleError(authViewModel.errorMessage!);
-    } else {
-      await _updateProgressDialog(context, "Creando tu cuenta...");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("¡Usuario creado exitosamente!"),
-          backgroundColor: Colors.green,
-        ),
-      );
-      _saveUserDataToPreferences(); // Guardar en SharedPreferences
-      replaceWith(context, const HomeScreen()); // Navegar al Home
-    }
-  }
-
-  // Validaciones del formulario
-  bool _validateForm() {
-    bool isValid = true;
-
-    if (displayNameController.text.isEmpty ||
-        displayNameController.text.length < 3) {
-      setState(
-          () => displayNameError = "El nombre debe tener al menos 3 letras");
-      isValid = false;
-    }
-
-    if (emailController.text.isEmpty) {
-      setState(() => emailError = "El correo no puede estar vacío");
-      isValid = false;
-    } else if (!_isValidEmail(emailController.text)) {
-      setState(() => emailError = "Ingrese un correo válido");
-      isValid = false;
-    }
-
-    if (passwordController.text.isEmpty) {
-      setState(() => passwordError = "La contraseña no puede estar vacía");
-      isValid = false;
-    } else if (passwordController.text != confirmPasswordController.text) {
-      setState(() => confirmPasswordError = "Las contraseñas no coinciden");
-      isValid = false;
-    }
-
-    return isValid;
-  }
-
-  // Manejo de errores
-  void _handleError(String errorMessage) {
-    setState(() {
-      if (errorMessage.contains("email")) {
-        emailError = "Correo electrónico no válido o ya en uso.";
-      } else if (errorMessage.contains("password")) {
-        passwordError = "La contraseña no cumple con los requisitos.";
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
-        );
-      }
-    });
-  }
-
-  // Guardar datos del usuario en SharedPreferences
-  void _saveUserDataToPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_email', emailController.text);
-    await prefs.setString('user_displayName', displayNameController.text);
-    await prefs.setString(
-        'user_photoUrl', _uploadedImageUrl ?? ''); // Guardar URL de la imagen
-  }
+class _RegisterFormState extends State<RegisterForm> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _displayNameController = TextEditingController();
+  final TextEditingController _phoneNumberController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  String? _selectedGender; // Variable para el género seleccionado
 
   @override
   Widget build(BuildContext context) {
-    final authViewModel = ref.watch(authViewModelProvider);
+    final authViewModel = Provider.of<AuthViewModel>(context);
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
-    return Form(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ProfilePictureSelectorWidget(
-            onImageUploaded: (imageUrl) {
-              setState(() {
-                _uploadedImageUrl =
-                    imageUrl; // Guardar la URL de la imagen subida
-              });
-            },
-          ),
-          const SizedBox(height: 40),
-          TextField(
-            controller: displayNameController,
-            decoration: InputDecoration(
-              labelText: AppStrings.displayNameHintText,
-              labelStyle: const TextStyle(fontSize: 16),
-              border: const OutlineInputBorder(),
-              errorText: displayNameError,
-            ),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            controller: emailController,
-            decoration: InputDecoration(
-              labelText: AppStrings.emailHintText,
-              labelStyle: const TextStyle(fontSize: 16),
-              border: const OutlineInputBorder(),
-              errorText: emailError,
-            ),
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            controller: passwordController,
-            decoration: InputDecoration(
-              labelText: AppStrings.passwordHintText,
-              labelStyle: const TextStyle(fontSize: 16),
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                AppStrings.registerHeader,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 28,
                 ),
-                onPressed: () {
-                  setState(() {
-                    isPasswordVisible = !isPasswordVisible;
-                  });
-                },
               ),
-              errorText: passwordError,
-            ),
-            obscureText: !isPasswordVisible,
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            controller: confirmPasswordController,
-            decoration: InputDecoration(
-              labelText: "Repite la Contraseña",
-              labelStyle: const TextStyle(fontSize: 16),
-              border: const OutlineInputBorder(),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  isConfirmPasswordVisible
-                      ? Icons.visibility
-                      : Icons.visibility_off,
+              const SizedBox(height: 8),
+              const Text(AppStrings.registerSubHeader),
+              const SizedBox(height: 40),
+              // Display Name
+              TextFormField(
+                controller: _displayNameController,
+                decoration: InputDecoration(
+                  labelText: AppStrings.displayNameHintText,
+                  prefixIcon: const Icon(Icons.person),
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: const OutlineInputBorder(),
                 ),
-                onPressed: () {
-                  setState(() {
-                    isConfirmPasswordVisible = !isConfirmPasswordVisible;
-                  });
-                },
+                validator: (value) => value != null && value.isNotEmpty
+                    ? null
+                    : 'Please enter your name',
+                onChanged: (value) => authViewModel.clearMessages(),
               ),
-              errorText: confirmPasswordError,
-            ),
-            obscureText: !isConfirmPasswordVisible,
-          ),
-          const SizedBox(height: 20),
-          ValueListenableBuilder<String>(
-            valueListenable: genderController,
-            builder: (context, value, child) {
-              final theme = Theme.of(context);
-
-              return DropdownButtonFormField<String>(
-                value: value,
-                decoration: const InputDecoration(
-                  labelText: AppStrings.genderHintText,
-                  border: OutlineInputBorder(),
+              const SizedBox(height: 20),
+              // Email
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: AppStrings.emailHintText,
+                  prefixIcon: const Icon(Icons.email),
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: const OutlineInputBorder(),
                 ),
-                items: [
-                  DropdownMenuItem(
-                    value: AppStrings.maleGenderText,
-                    child: Text(
-                      AppStrings.maleGenderText,
-                      style: TextStyle(
-                        color: theme.brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                        fontWeight: FontWeight.normal, // Normal weight
-                      ),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) => Validators.emailValidator(value!),
+                onChanged: (value) => authViewModel.clearMessages(),
+              ),
+              const SizedBox(height: 20),
+              // Password
+              TextFormField(
+                controller: _passwordController,
+                obscureText: !authViewModel.isPasswordVisible,
+                decoration: InputDecoration(
+                  labelText: AppStrings.passwordHintText,
+                  prefixIcon: const Icon(Icons.lock),
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: const OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      authViewModel.isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: authViewModel.togglePasswordVisibility,
+                  ),
+                ),
+                validator: (value) => Validators.passwordValidator(value!),
+                onChanged: (value) => authViewModel.clearMessages(),
+              ),
+              const SizedBox(height: 20),
+              // Confirm Password
+              TextFormField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Confirm Password',
+                  prefixIcon: const Icon(Icons.lock),
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: const OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value != _passwordController.text) {
+                    return 'Passwords do not match';
+                  }
+                  return null;
+                },
+                onChanged: (value) => authViewModel.clearMessages(),
+              ),
+              const SizedBox(height: 20),
+              // Phone Number
+              TextFormField(
+                controller: _phoneNumberController,
+                decoration: InputDecoration(
+                  labelText: AppStrings.phoneHintText,
+                  prefixIcon: const Icon(Icons.phone),
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: const OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.phone,
+                validator: (value) => value != null && value.isNotEmpty
+                    ? null
+                    : 'Please enter your phone number',
+                onChanged: (value) => authViewModel.clearMessages(),
+              ),
+              const SizedBox(height: 20),
+              // Address
+              TextFormField(
+                controller: _addressController,
+                decoration: InputDecoration(
+                  labelText: AppStrings.addressHintText,
+                  prefixIcon: const Icon(Icons.location_on),
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: const OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.streetAddress,
+                validator: (value) => value != null && value.isNotEmpty
+                    ? null
+                    : 'Please enter your address',
+                onChanged: (value) => authViewModel.clearMessages(),
+              ),
+              const SizedBox(height: 20),
+              // Gender (Dropdown)
+              DropdownButtonFormField<String>(
+                value: _selectedGender,
+                decoration: InputDecoration(
+                  labelText: 'Gender',
+                  prefixIcon: const Icon(Icons.person_outline),
+                  labelStyle: const TextStyle(fontSize: 16),
+                  border: const OutlineInputBorder(),
+                ),
+                items: ['Male', 'Female', 'Other']
+                    .map((gender) => DropdownMenuItem(
+                  value: gender,
+                  child: Text(
+                    gender,
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
-                  DropdownMenuItem(
-                    value: AppStrings.femaleGenderText,
-                    child: Text(
-                      AppStrings.femaleGenderText,
-                      style: TextStyle(
-                        color: theme.brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                        fontWeight: FontWeight.normal, // Normal weight
-                      ),
-                    ),
-                  ),
-                  DropdownMenuItem(
-                    value: AppStrings.otherGenderText,
-                    child: Text(
-                      AppStrings.otherGenderText,
-                      style: TextStyle(
-                        color: theme.brightness == Brightness.dark
-                            ? Colors.white
-                            : Colors.black,
-                        fontWeight: FontWeight.normal, // Normal weight
-                      ),
-                    ),
-                  ),
-                ],
+                ))
+                    .toList(),
                 onChanged: (value) {
-                  if (value != null) {
-                    genderController.value = value;
+                  setState(() {
+                    _selectedGender = value;
+                  });
+                  authViewModel.clearMessages();
+                },
+                validator: (value) => value == null
+                    ? 'Please select your gender'
+                    : null,
+              ),
+              const SizedBox(height: 20),
+              // Register Button
+              // Register Button
+              ElevatedButton(
+                onPressed: () async {
+                  if (_formKey.currentState!.validate()) {
+                    await authViewModel.register(
+                      email: _emailController.text,
+                      password: _passwordController.text,
+                      displayName: _displayNameController.text,
+                      phoneNumber: _phoneNumberController.text,
+                      address: _addressController.text,
+                      gender: _selectedGender!,
+                    );
+                    if (authViewModel.signUpErrorMessage != null) {
+                      showCustomSnackBar(
+                          context, authViewModel.signUpErrorMessage!);
+                    } else if (authViewModel.successMessage != null) {
+                      // Mostrar SnackBar con "Usuario creado"
+                      showCustomSnackBar(context, 'Usuario creado con éxito');
+                      // Navegar a HomeScreen
+                      replaceWith(context, const HomeScreen());
+                    }
                   }
                 },
-              );
-            },
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(50),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  textStyle: const TextStyle(fontSize: 18),
+                ),
+                child: authViewModel.isLoading
+                    ? const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                )
+                    : const Text(AppStrings.registerButtonText),
+              ),
+            ],
           ),
-          const SizedBox(height: 40),
-          ElevatedButton(
-            onPressed: () => _signUp(authViewModel),
-            style: ElevatedButton.styleFrom(
-              minimumSize: const Size.fromHeight(50),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              textStyle: const TextStyle(fontSize: 18),
-            ),
-            child: const Text(AppStrings.registerButtonText),
-          ),
-          const SizedBox(height: 10),
-        ],
+        ),
       ),
     );
   }

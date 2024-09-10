@@ -3,12 +3,12 @@ import 'package:go_triunfo/core/errors/failures.dart';
 import 'package:go_triunfo/feature/auth/domain/entities/user.dart';
 import 'package:go_triunfo/feature/auth/domain/repositories/auth_repository.dart';
 
-class SignUpUser {
+class GetCurrentUser {
   final AuthRepository repository;
 
-  SignUpUser(this.repository);
+  GetCurrentUser(this.repository);
 
-  Future<Either<Failure, User>> call(User user, String password) async {
-    return await repository.signUp(user, password);
+  Future<Either<Failure, User?>> call() async {
+    return await repository.getCurrentUser();
   }
 }

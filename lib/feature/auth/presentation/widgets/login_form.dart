@@ -1,44 +1,74 @@
 import 'package:flutter/material.dart';
+import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
+import 'package:provider/provider.dart';
 import 'package:go_triunfo/core/resources/strings.dart';
+import 'package:go_triunfo/core/utils/helpers/validators.dart';
+import 'package:go_triunfo/core/utils/widgets/showCustomSnackBar.dart';
 import 'package:go_triunfo/core/utils/navigation/navigator_helper.dart';
 import 'package:go_triunfo/feature/auth/presentation/screens/forgot_password_screen.dart';
+import 'package:go_triunfo/feature/home/presentation/screens/home_screen.dart';
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
   @override
+  _LoginFormState createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  @override
   Widget build(BuildContext context) {
+    final authViewModel = Provider.of<AuthViewModel>(context);
+
     return Form(
+      key: _formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             AppStrings.loginHeader,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 28,
-                ),
+              fontWeight: FontWeight.w500,
+              fontSize: 28,
+            ),
           ),
           const SizedBox(height: 8),
           const Text(AppStrings.loginSubHeader),
           const SizedBox(height: 40),
-          const TextField(
-            decoration: InputDecoration(
+          TextFormField(
+            controller: _emailController,
+            decoration: const InputDecoration(
               labelText: AppStrings.emailHintText,
               labelStyle: TextStyle(fontSize: 16),
               border: OutlineInputBorder(),
             ),
             keyboardType: TextInputType.emailAddress,
+            validator: (value) => Validators.emailValidator(value!),
+            onChanged: (value) => authViewModel.clearMessages(),
           ),
           const SizedBox(height: 20),
-          const TextField(
+          TextFormField(
+            controller: _passwordController,
+            obscureText: !authViewModel.isPasswordVisible,
             decoration: InputDecoration(
               labelText: AppStrings.passwordHintText,
-              labelStyle: TextStyle(fontSize: 16),
-              border: OutlineInputBorder(),
-              suffixIcon: Icon(Icons.visibility_off), // Icono predeterminado
+              labelStyle: const TextStyle(fontSize: 16),
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  authViewModel.isPasswordVisible
+                      ? Icons.visibility
+                      : Icons.visibility_off,
+                ),
+                onPressed: authViewModel.togglePasswordVisibility,
+              ),
             ),
-            obscureText: true, // Predeterminado
+            validator: (value) => Validators.passwordValidator(value!),
+            onChanged: (value) => authViewModel.clearMessages(),
           ),
           Align(
             alignment: Alignment.centerRight,
@@ -57,15 +87,29 @@ class LoginForm extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           ElevatedButton(
-            onPressed: () {
-              // Acción del botón de inicio de sesión
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                await authViewModel.login(
+                    _emailController.text,
+                    _passwordController.text
+                );
+                if (authViewModel.loginErrorMessage != null) {
+                  showCustomSnackBar(context, authViewModel.loginErrorMessage!);
+                } else if (authViewModel.successMessage != null) {
+                  replaceWith(context, const HomeScreen());
+                }
+              }
             },
             style: ElevatedButton.styleFrom(
               minimumSize: const Size.fromHeight(50),
               backgroundColor: Theme.of(context).colorScheme.primary,
               textStyle: const TextStyle(fontSize: 18),
             ),
-            child: const Text(AppStrings.loginButtonText),
+            child: authViewModel.isLoading
+                ? const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+            )
+                : const Text(AppStrings.loginButtonText),
           ),
         ],
       ),

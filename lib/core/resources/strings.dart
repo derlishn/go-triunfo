@@ -14,6 +14,8 @@ class AppStrings {
       "Por favor, completa la información para registrarte";
   static const String displayNameHintText = "Nombre completo";
   static const String genderHintText = "Selecciona tu género";
+  static const String phoneHintText = "Escribe tu celular";
+  static const String addressHintText = "Escribe tu direccion";
   static const String maleGenderText = "Hombre";
   static const String femaleGenderText = "Mujer";
   static const String otherGenderText = "Otro";
