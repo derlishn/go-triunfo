@@ -201,7 +201,7 @@ class _RegisterFormState extends State<RegisterForm> {
                       // Mostrar SnackBar con "Usuario creado"
                       showCustomSnackBar(context, 'Usuario creado con éxito');
                       // Navegar a HomeScreen
-                      replaceWith(context, const HomeScreen());
+                      replaceAndRemoveUntil(context, const HomeScreen());
                     }
                   }
                 },
