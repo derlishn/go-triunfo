@@ -11,28 +11,20 @@ import 'package:go_triunfo/feature/auth/data/repositories/auth_repository_impl.d
 import 'package:go_triunfo/feature/auth/data/datasources/auth_data_source.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:go_triunfo/feature/auth/presentation/screens/login_screen.dart';
-import 'package:go_triunfo/feature/home/presentation/screens/home_screen.dart';
 
 import 'core/resources/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializar Firebase
+
   await Firebase.initializeApp();
 
-  // Inicialización de FirebaseAuth y Firestore para el DataSource
   final firebaseAuth = firebase_auth.FirebaseAuth.instance;
   final firestore = FirebaseFirestore.instance;
-
-  // Crear instancia del AuthDataSource
   final authDataSource = FirebaseAuthDataSource(auth: firebaseAuth, firestore: firestore);
-
-  // Crear instancia del AuthRepositoryImpl
   final authRepository = AuthRepositoryImpl(authDataSource: authDataSource);
 
-  // Correr la aplicación con MultiProvider
   runApp(
     MultiProvider(
       providers: [

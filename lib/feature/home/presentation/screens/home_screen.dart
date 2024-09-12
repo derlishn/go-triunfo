@@ -2,17 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Fetch user data once when the screen is first loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+      if (authViewModel.currentUser == null) { // Only fetch if user is not already loaded
+        authViewModel.fetchCurrentUser();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final authViewModel = Provider.of<AuthViewModel>(context);
-
-    // Fetch current user data when HomeScreen is loaded
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      authViewModel.fetchCurrentUser();
-    });
 
     return Scaffold(
       appBar: AppBar(
