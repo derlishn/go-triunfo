@@ -100,7 +100,7 @@ class FirebaseAuthDataSource implements AuthDataSource {
         case 'user-not-found':
           return ServerFailure('Usuario no encontrado. Regístrate primero.');
         default:
-          return ServerFailure('Error! Intentalo más tarde');
+          return ServerFailure('Error: ${error.message}');
       }
     } else {
       return ServerFailure('Error inesperado: ${error.toString()}');

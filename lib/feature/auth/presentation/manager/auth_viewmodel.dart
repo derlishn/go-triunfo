@@ -130,12 +130,18 @@ class AuthViewModel extends ChangeNotifier {
     final result = await signInUserUseCase.call(SignInParams(email: email, password: password));
 
     result.fold(
-          (failure) => _handleError(failure, "login"),
-          (user) => _handleSuccessUser(user),
+            (failure) => _handleError(failure, "login"),
+            (user) {
+          _handleSuccessUser(user);
+          _successMessage = AppStrings.operationSuccess;
+          notifyListeners();  // Asegúrate de notificar cambios para actualizar la UI.
+        }
     );
 
     _setLoading(false);
   }
+
+
 
   // Clear Error and Success Messages
   void clearMessages() {
