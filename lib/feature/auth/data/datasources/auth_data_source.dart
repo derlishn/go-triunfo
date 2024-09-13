@@ -1,10 +1,12 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:go_triunfo/feature/auth/data/models/user_model.dart';
+import '../../../../core/errors/failures.dart';
 
 abstract class AuthDataSource {
   Future<UserModel> signIn(String email, String password);
-  Future<UserModel> signUp(UserModel user, String password); // Password ahora es dinámico
+  Future<UserModel> signUp(UserModel user, String password);
   Future<void> signOut();
   Future<UserModel?> getCurrentUser();
 }
@@ -18,42 +20,29 @@ class FirebaseAuthDataSource implements AuthDataSource {
     required this.firestore,
   });
 
-  @override
-  Future<UserModel> signIn(String email, String password) async {
+  Future<UserModel> signUp(UserModel user, String password) async {
     try {
-      final credential = await auth.signInWithEmailAndPassword(email: email, password: password);
-      final user = credential.user!;
-
-      // Obtener los datos del usuario desde Firestore
-      final docSnapshot = await firestore.collection('users').doc(user.uid).get();
-      if (docSnapshot.exists) {
-        return UserModel.fromJson(docSnapshot.data()!);
-      } else {
-        throw Exception('User data not found in Firestore');
-      }
+      final credential = await auth.createUserWithEmailAndPassword(
+          email: user.email, password: password);
+      final userModel = user.copyWith(uid: credential.user!.uid);
+      await _saveUserToFirestore(userModel);
+      return userModel;
+    } on SocketException {
+      // Captura específicamente la falta de conexión a Internet.
+      throw NetworkFailure('No hay conexión a Internet.');
     } catch (e) {
-      // Manejo de errores de autenticación y Firestore
-      throw Exception('Error signing in: ${e.toString()}');
+      throw _handleAuthError(e);
     }
   }
 
   @override
-  Future<UserModel> signUp(UserModel user, String password) async {
+  Future<UserModel> signIn(String email, String password) async {
     try {
-      // Registrar el usuario en Firebase Authentication
-      final credential = await auth.createUserWithEmailAndPassword(email: user.email, password: password);
-
-      // Crear el modelo del usuario con el UID generado por Firebase
-      final userModel = user.copyWith(uid: credential.user!.uid);
-
-      // Guardar los datos del usuario en Firestore
-      final userDoc = firestore.collection('users').doc(credential.user!.uid);
-      await userDoc.set(userModel.toJson());
-
-      return userModel;
+      final credential = await auth.signInWithEmailAndPassword(
+          email: email, password: password);
+      return await _fetchUserFromFirestore(credential.user!.uid);
     } catch (e) {
-      // Manejo de errores de registro y Firestore
-      throw Exception('Error signing up: ${e.toString()}');
+      throw _handleAuthError(e); // Lanza la excepción correctamente
     }
   }
 
@@ -62,8 +51,7 @@ class FirebaseAuthDataSource implements AuthDataSource {
     try {
       await auth.signOut();
     } catch (e) {
-      // Manejo de errores en el cierre de sesión
-      throw Exception('Error signing out: ${e.toString()}');
+      throw ServerFailure('Error al cerrar sesión: ${e.toString()}');
     }
   }
 
@@ -72,17 +60,50 @@ class FirebaseAuthDataSource implements AuthDataSource {
     try {
       final firebaseUser = auth.currentUser;
       if (firebaseUser != null) {
-        final docSnapshot = await firestore.collection('users').doc(firebaseUser.uid).get();
-        if (docSnapshot.exists) {
-          return UserModel.fromJson(docSnapshot.data()!);
-        } else {
-          throw Exception('User data not found in Firestore');
-        }
+        return await _fetchUserFromFirestore(firebaseUser.uid);
       }
       return null;
     } catch (e) {
-      // Manejo de errores al obtener el usuario actual
-      throw Exception('Error fetching current user: ${e.toString()}');
+      throw ServerFailure(
+          'Error al obtener el usuario actual: ${e.toString()}');
+    }
+  }
+
+  // Guardar los datos del usuario en Firestore
+  Future<void> _saveUserToFirestore(UserModel user) async {
+    final userDoc = firestore.collection('users').doc(user.uid);
+    await userDoc.set(user.toJson());
+  }
+
+  // Obtener los datos del usuario desde Firestore
+  Future<UserModel> _fetchUserFromFirestore(String uid) async {
+    final docSnapshot = await firestore.collection('users').doc(uid).get();
+    if (docSnapshot.exists) {
+      return UserModel.fromJson(docSnapshot.data()!);
+    } else {
+      throw ServerFailure(
+          'Los datos del usuario no se encontraron en Firestore.');
+    }
+  }
+
+  Failure _handleAuthError(dynamic error) {
+    if (error is firebase_auth.FirebaseAuthException) {
+      switch (error.code) {
+        case 'email-already-in-use':
+          return ServerFailure('Este correo electrónico ya está en uso.');
+        case 'invalid-email':
+          return ServerFailure('El correo electrónico no es válido.');
+        case 'weak-password':
+          return ServerFailure('La contraseña es demasiado débil.');
+        case 'wrong-password':
+          return ServerFailure('Contraseña incorrecta. Inténtalo de nuevo.');
+        case 'user-not-found':
+          return ServerFailure('Usuario no encontrado. Regístrate primero.');
+        default:
+          return ServerFailure('Error! Intentalo más tarde');
+      }
+    } else {
+      return ServerFailure('Error inesperado: ${error.toString()}');
     }
   }
 }

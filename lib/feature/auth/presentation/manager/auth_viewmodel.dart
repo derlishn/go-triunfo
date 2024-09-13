@@ -6,6 +6,7 @@ import 'package:go_triunfo/feature/auth/domain/use_cases/sign_in_user.dart';
 import 'package:go_triunfo/feature/auth/domain/use_cases/sign_out_user.dart';
 import 'package:go_triunfo/feature/auth/domain/use_cases/sign_up_user.dart';
 import 'package:go_triunfo/core/errors/failures.dart';
+import 'package:go_triunfo/core/resources/strings.dart';
 import 'package:go_triunfo/feature/welcome/presentation/screens/welcome_screen.dart';
 
 class AuthViewModel extends ChangeNotifier {
@@ -75,15 +76,13 @@ class AuthViewModel extends ChangeNotifier {
           (_) {
         _currentUser = null;
         replaceWith(context, const WelcomeScreen());
-        _successMessage = "Successfully logged out.";
+        _successMessage = AppStrings.successLoggedOut;
       },
     );
 
     _setLoading(false);
   }
 
-
-// Register User
   Future<void> register({
     required String email,
     required String password,
@@ -95,7 +94,6 @@ class AuthViewModel extends ChangeNotifier {
     _setLoading(true);
     clearMessages();
 
-    // Crear el objeto User para el registro
     final user = User(
       uid: '', // El UID será generado por Firebase
       email: email,
@@ -103,13 +101,11 @@ class AuthViewModel extends ChangeNotifier {
       phoneNumber: phoneNumber,
       address: address,
       createdAt: DateTime.now(),
-      role: 'client', // Rol por defecto
-      accountStatus: 'active', // Estado de la cuenta por defecto
-      gender: gender, // Añadido el campo de género
+      role: 'client',
+      gender: gender,
       orders: 0, // Órdenes iniciales en 0
     );
 
-    // Llamar al caso de uso signUpUser con el usuario creado y la contraseña
     final result = await signUpUserUseCase.call(user, password);
 
     result.fold(
@@ -118,13 +114,12 @@ class AuthViewModel extends ChangeNotifier {
       },
           (registeredUser) {
         _handleSuccessUser(registeredUser);
-        _successMessage = "Usuario creado con éxito"; // Mensaje de éxito asignado
+        _successMessage = AppStrings.successUserCreated;
       },
     );
 
     _setLoading(false);
   }
-
 
 
   // Login User
@@ -161,20 +156,26 @@ class AuthViewModel extends ChangeNotifier {
   void _handleSuccessUser(User? user) {
     if (user != null) {
       _currentUser = user;
-      _successMessage = "Operation completed successfully.";
+      _successMessage = AppStrings.operationSuccess;
       clearMessages();
     } else {
-      _generalErrorMessage = "User data is null";
+      _generalErrorMessage = AppStrings.errorGeneral;
     }
     notifyListeners();
   }
 
-  // Helper: Handle Errors
   void _handleError(Failure failure, String operationType) {
-    String message = failure is ServerFailure
-        ? failure.message
-        : "An unknown error occurred.";
+    String message;
 
+    if (failure is NetworkFailure) {
+      message = failure.message;  // Asegúrate de que el mensaje se propaga
+    } else if (failure is ServerFailure) {
+      message = failure.message;  // Accede al mensaje de ServerFailure
+    } else {
+      message = 'Ocurrió un error desconocido';
+    }
+
+    // Dependiendo de la operación, asigna el mensaje correcto
     switch (operationType) {
       case "login":
         _loginErrorMessage = message;

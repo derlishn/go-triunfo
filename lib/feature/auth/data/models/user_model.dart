@@ -10,7 +10,6 @@ class UserModel extends User {
     String? photoUrl, // Optional photoUrl
     required DateTime createdAt,
     required String role,
-    required String accountStatus,
     required String gender, // Added gender field
     int orders = 0, // Orders initialized at 0
   }) : super(
@@ -22,7 +21,6 @@ class UserModel extends User {
     photoUrl: photoUrl ?? 'https://defaulturl.com/default-photo.png', // Default photo URL if not provided
     createdAt: createdAt,
     role: role,
-    accountStatus: accountStatus,
     gender: gender,
     orders: orders,
   );
@@ -38,7 +36,6 @@ class UserModel extends User {
       'photoUrl': photoUrl,
       'createdAt': createdAt.toIso8601String(),
       'role': role,
-      'accountStatus': accountStatus,
       'gender': gender,
       'orders': orders,
     };
@@ -55,7 +52,6 @@ class UserModel extends User {
       photoUrl: json['photoUrl'],
       createdAt: DateTime.parse(json['createdAt']),
       role: json['role'],
-      accountStatus: json['accountStatus'],
       gender: json['gender'],
       orders: json['orders'] ?? 0, // Default to 0 if not present
     );
@@ -84,7 +80,6 @@ class UserModel extends User {
       photoUrl: photoUrl ?? this.photoUrl,
       createdAt: createdAt ?? this.createdAt,
       role: role ?? this.role,
-      accountStatus: accountStatus ?? this.accountStatus,
       gender: gender ?? this.gender,
       orders: orders ?? this.orders,
     );

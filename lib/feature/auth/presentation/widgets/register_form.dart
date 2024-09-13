@@ -11,6 +11,7 @@ class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
 
   @override
+
   _RegisterFormState createState() => _RegisterFormState();
 }
 
@@ -51,26 +52,26 @@ class _RegisterFormState extends State<RegisterForm> {
               // Display Name
               TextFormField(
                 controller: _displayNameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: AppStrings.displayNameHintText,
-                  prefixIcon: const Icon(Icons.person),
-                  labelStyle: const TextStyle(fontSize: 16),
-                  border: const OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.person),
+                  labelStyle: TextStyle(fontSize: 16),
+                  border: OutlineInputBorder(),
                 ),
                 validator: (value) => value != null && value.isNotEmpty
                     ? null
-                    : 'Please enter your name',
+                    : AppStrings.errorDisplayNameRequired,
                 onChanged: (value) => authViewModel.clearMessages(),
               ),
               const SizedBox(height: 20),
               // Email
               TextFormField(
                 controller: _emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: AppStrings.emailHintText,
-                  prefixIcon: const Icon(Icons.email),
-                  labelStyle: const TextStyle(fontSize: 16),
-                  border: const OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email),
+                  labelStyle: TextStyle(fontSize: 16),
+                  border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) => Validators.emailValidator(value!),
@@ -103,15 +104,15 @@ class _RegisterFormState extends State<RegisterForm> {
               TextFormField(
                 controller: _confirmPasswordController,
                 obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  prefixIcon: const Icon(Icons.lock),
-                  labelStyle: const TextStyle(fontSize: 16),
-                  border: const OutlineInputBorder(),
+                decoration: const InputDecoration(
+                  labelText: AppStrings.confirmPasswordHintText,
+                  prefixIcon: Icon(Icons.lock),
+                  labelStyle: TextStyle(fontSize: 16),
+                  border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value != _passwordController.text) {
-                    return 'Passwords do not match';
+                    return AppStrings.errorPasswordsDoNotMatch;
                   }
                   return null;
                 },
@@ -121,45 +122,45 @@ class _RegisterFormState extends State<RegisterForm> {
               // Phone Number
               TextFormField(
                 controller: _phoneNumberController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: AppStrings.phoneHintText,
-                  prefixIcon: const Icon(Icons.phone),
-                  labelStyle: const TextStyle(fontSize: 16),
-                  border: const OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.phone),
+                  labelStyle: TextStyle(fontSize: 16),
+                  border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.phone,
                 validator: (value) => value != null && value.isNotEmpty
                     ? null
-                    : 'Please enter your phone number',
+                    : AppStrings.errorPhoneRequired,
                 onChanged: (value) => authViewModel.clearMessages(),
               ),
               const SizedBox(height: 20),
               // Address
               TextFormField(
                 controller: _addressController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: AppStrings.addressHintText,
-                  prefixIcon: const Icon(Icons.location_on),
-                  labelStyle: const TextStyle(fontSize: 16),
-                  border: const OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.location_on),
+                  labelStyle: TextStyle(fontSize: 16),
+                  border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.streetAddress,
                 validator: (value) => value != null && value.isNotEmpty
                     ? null
-                    : 'Please enter your address',
+                    : AppStrings.errorAddressRequired,
                 onChanged: (value) => authViewModel.clearMessages(),
               ),
               const SizedBox(height: 20),
               // Gender (Dropdown)
               DropdownButtonFormField<String>(
                 value: _selectedGender,
-                decoration: InputDecoration(
-                  labelText: 'Gender',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  labelStyle: const TextStyle(fontSize: 16),
-                  border: const OutlineInputBorder(),
+                decoration: const InputDecoration(
+                  labelText: AppStrings.gendertitle,
+                  prefixIcon: Icon(Icons.person_outline),
+                  labelStyle: TextStyle(fontSize: 16),
+                  border: OutlineInputBorder(),
                 ),
-                items: ['Male', 'Female', 'Other']
+                items: [AppStrings.maleGenderText, AppStrings.femaleGenderText, AppStrings.otherGenderText]
                     .map((gender) => DropdownMenuItem(
                   value: gender,
                   child: Text(
@@ -177,7 +178,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   authViewModel.clearMessages();
                 },
                 validator: (value) => value == null
-                    ? 'Please select your gender'
+                    ? AppStrings.errorGenderRequired
                     : null,
               ),
               const SizedBox(height: 20),
@@ -186,6 +187,10 @@ class _RegisterFormState extends State<RegisterForm> {
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
+                    // Limpia los mensajes previos
+                    authViewModel.clearMessages();
+
+                    // Llama al método de registro
                     await authViewModel.register(
                       email: _emailController.text,
                       password: _passwordController.text,
@@ -194,13 +199,21 @@ class _RegisterFormState extends State<RegisterForm> {
                       address: _addressController.text,
                       gender: _selectedGender!,
                     );
+
                     if (authViewModel.signUpErrorMessage != null) {
+                      // Asegúrate de mostrar el mensaje de error con `isError: true`.
                       showCustomSnackBar(
-                          context, authViewModel.signUpErrorMessage!);
+                        context,
+                        authViewModel.signUpErrorMessage!,
+                        isError: true,
+                      );
                     } else if (authViewModel.successMessage != null) {
-                      // Mostrar SnackBar con "Usuario creado"
-                      showCustomSnackBar(context, 'Usuario creado con éxito');
-                      // Navegar a HomeScreen
+                      showCustomSnackBar(
+                        context,
+                        authViewModel.successMessage!,
+                        isError: false, // Verde para mensajes de éxito
+                      );
+                      // Navegar a HomeScreen después de éxito
                       replaceAndRemoveUntil(context, const HomeScreen());
                     }
                   }
@@ -215,7 +228,7 @@ class _RegisterFormState extends State<RegisterForm> {
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 )
                     : const Text(AppStrings.registerButtonText),
-              ),
+              )
             ],
           ),
         ),

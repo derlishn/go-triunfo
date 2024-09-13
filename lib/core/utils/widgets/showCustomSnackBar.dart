@@ -12,8 +12,8 @@ void showCustomSnackBar(BuildContext context, String message, {bool isError = fa
         Expanded(
           child: Text(
             message,
-            style: TextStyle(
-              color: isError ? Colors.redAccent : Colors.greenAccent,
+            style: const TextStyle(
+              color: Colors.white, // Texto en blanco para mejor visibilidad
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),
@@ -32,3 +32,4 @@ void showCustomSnackBar(BuildContext context, String message, {bool isError = fa
 
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
+

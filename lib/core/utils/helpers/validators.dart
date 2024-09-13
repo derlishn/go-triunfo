@@ -1,3 +1,5 @@
+import '../../resources/strings.dart';
+
 class Validators {
   // Validación de campo vacío
   static String? validateNotEmpty(String? value) {
@@ -9,18 +11,18 @@ class Validators {
 
   static String? emailValidator(String value) {
     if (value.isEmpty) {
-      return 'Email is required';
+      return AppStrings.errorEmailRequired;
     } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-      return 'Enter a valid email';
+      return AppStrings.errorInvalidEmail;
     }
     return null;
   }
 
   static String? passwordValidator(String value) {
     if (value.isEmpty) {
-      return 'Password is required';
+      return AppStrings.errorPasswordRequired;
     } else if (value.length < 6) {
-      return 'Password must be at least 6 characters long';
+      return 'La contraseña debe tener 6 characters o más';
     }
     return null;
   }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 import 'package:go_triunfo/core/errors/failures.dart';
 import 'package:go_triunfo/feature/auth/data/datasources/auth_data_source.dart';
@@ -15,8 +17,12 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final user = await authDataSource.signIn(email, password);
       return Right(user);
+    } on Failure catch (failure) {
+      // Aquí atrapamos el Failure lanzado por el dataSource y lo retornamos tal cual
+      return Left(failure);
     } catch (e) {
-      return Left(ServerFailure('Failed to sign in: ${e.toString()}'));
+      // Si es cualquier otro tipo de error, devolvemos un mensaje genérico
+      return Left(ServerFailure('Error desconocido: ${e.toString()}'));
     }
   }
 
@@ -24,7 +30,7 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, User>> signUp(User user, String password) async {
     try {
       final userModel = UserModel(
-        uid: user.uid,
+        uid: '', // El UID será generado por Firebase
         email: user.email,
         displayName: user.displayName,
         phoneNumber: user.phoneNumber,
@@ -32,14 +38,16 @@ class AuthRepositoryImpl implements AuthRepository {
         photoUrl: user.photoUrl,
         createdAt: user.createdAt,
         role: user.role,
-        accountStatus: user.accountStatus,
-        gender: user.gender, // Add gender field
-        orders: user.orders, // Add orders field, initially 0
+        gender: user.gender,
+        orders: user.orders,
       );
-      final signedUpUser = await authDataSource.signUp(userModel, password); // Pass the password dynamically
+
+      final signedUpUser = await authDataSource.signUp(userModel, password);
       return Right(signedUpUser);
+    } on Failure catch (failure) {
+      return Left(failure); // Retorna el Failure tal como fue lanzado
     } catch (e) {
-      return Left(ServerFailure('Failed to sign up: ${e.toString()}'));
+      return Left(ServerFailure('Error! Intentalo más tarde'));
     }
   }
 
@@ -48,8 +56,11 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await authDataSource.signOut();
       return const Right(null);
+    } on Failure catch (failure) {
+      // Aquí atrapamos el Failure lanzado por el dataSource y lo retornamos tal cual
+      return Left(failure);
     } catch (e) {
-      return Left(ServerFailure('Failed to sign out: ${e.toString()}'));
+      return Left(ServerFailure('Error desconocido: ${e.toString()}'));
     }
   }
 
@@ -58,8 +69,11 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final user = await authDataSource.getCurrentUser();
       return Right(user);
+    } on Failure catch (failure) {
+      // Aquí atrapamos el Failure lanzado por el dataSource y lo retornamos tal cual
+      return Left(failure);
     } catch (e) {
-      return Left(ServerFailure('Failed to fetch current user: ${e.toString()}'));
+      return Left(ServerFailure('Error desconocido: ${e.toString()}'));
     }
   }
 }
