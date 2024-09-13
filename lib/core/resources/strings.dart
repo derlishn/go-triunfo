@@ -1,5 +1,6 @@
 class AppStrings {
   // Textos para la pantalla de autenticación
+  static const String titleApp = "GoTriunfo App";
   static const String loginButtonText = "Iniciar Sesión";
   static const String registerButtonText = "Registrarse";
   static const String welcomeText = "Bienvenido a GoTriunfo";

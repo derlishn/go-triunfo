@@ -1,45 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:go_triunfo/feature/welcome/presentation/screens/welcome_screen.dart';
-import 'package:provider/provider.dart';
-import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/get_current_user.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/sign_in_user.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/sign_out_user.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/sign_up_user.dart';
-import 'package:go_triunfo/feature/auth/data/repositories/auth_repository_impl.dart';
-import 'package:go_triunfo/feature/auth/data/datasources/auth_data_source.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'core/resources/theme.dart';
+import 'app_initializer.dart';  // Importar la función de inicialización
+import 'firebase_options.dart';  // Importar el archivo generado por Firebase CLI
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-
-  await Firebase.initializeApp();
-
-  final firebaseAuth = firebase_auth.FirebaseAuth.instance;
-  final firestore = FirebaseFirestore.instance;
-  final authDataSource = FirebaseAuthDataSource(auth: firebaseAuth, firestore: firestore);
-  final authRepository = AuthRepositoryImpl(authDataSource: authDataSource);
-
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (_) => AuthViewModel(
-            getCurrentUserUseCase: GetCurrentUser(authRepository),
-            signInUserUseCase: SignInUser(authRepository),
-            signUpUserUseCase: SignUpUser(authRepository),
-            signOutUserUseCase: SignOutUser(authRepository),
-          ),
-        ),
-      ],
-      child: const MyApp(),
-    ),
+  // Inicializar Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Inicializar la app y obtener el MultiProvider con los ViewModels
+  final appProvider = await initializeApp();
+
+  // Ejecutar la aplicación con el MultiProvider correctamente configurado
+  runApp(appProvider);
 }
 
 class MyApp extends StatelessWidget {
