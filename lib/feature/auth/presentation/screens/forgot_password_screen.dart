@@ -18,7 +18,7 @@ class ForgotPasswordScreen extends StatelessWidget {
           children: [
             Text(
               'Ingrese su correo electrónico para restablecer la contraseña',
-              style: Theme.of(context).textTheme.bodyText1,
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
             const SizedBox(height: 20),
             TextField(

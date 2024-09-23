@@ -1,50 +1,59 @@
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:go_triunfo/feature/auth/data/datasources/auth_data_source.dart';
-import 'package:go_triunfo/feature/auth/data/repositories/auth_repository_impl.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/get_current_user.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/sign_in_user.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/sign_out_user.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/sign_up_user.dart';
+import 'package:provider/provider.dart';
 import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
-
+import 'package:go_triunfo/feature/auth/data/repositories/auth_repository_impl.dart';
+import 'package:go_triunfo/feature/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:go_triunfo/feature/auth/domain/use_cases/sign_in_user.dart';
+import 'package:go_triunfo/feature/auth/domain/use_cases/sign_up_user.dart';
+import 'package:go_triunfo/feature/auth/domain/use_cases/get_current_user.dart';
+import 'package:go_triunfo/feature/auth/domain/use_cases/sign_out_user.dart';
+import 'firebase_options.dart'; // Archivo de configuración de Firebase
 import 'main.dart';
 
-Future<Widget> initializeApp() async {
-  // Asegúrate de que esta línea se ejecute antes de cualquier uso de Firebase
-  await Firebase.initializeApp();  // Inicializar Firebase antes de cualquier operación
+Future<MultiProvider> initializeApp() async {
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  // Inicializar Firebase Auth y Firestore
   final firebaseAuth = firebase_auth.FirebaseAuth.instance;
-  final firestore = FirebaseFirestore.instance;
+  final authRemoteDataSource = AuthRemoteDataSourceImpl(firebaseAuth: firebaseAuth);
+  final authRepository = AuthRepositoryImpl(remoteDataSource: authRemoteDataSource);
 
-  final authDataSource = FirebaseAuthDataSource(auth: firebaseAuth, firestore: firestore);
-  final authRepository = AuthRepositoryImpl(authDataSource: authDataSource);
+  await initializeAppCheck();
 
-  // Inicializar casos de uso
-  final getCurrentUser = GetCurrentUser(authRepository);
   final signInUser = SignInUser(authRepository);
   final signUpUser = SignUpUser(authRepository);
+  final getCurrentUser = GetCurrentUser(authRepository);
   final signOutUser = SignOutUser(authRepository);
 
-  // Crear el AuthViewModel
-  final authViewModel = AuthViewModel(
-    getCurrentUserUseCase: getCurrentUser,
-    signInUserUseCase: signInUser,
-    signUpUserUseCase: signUpUser,
-    signOutUserUseCase: signOutUser,
-  );
-
-  // Retornar el MultiProvider con el ViewModel ya creado
   return MultiProvider(
     providers: [
-      ChangeNotifierProvider<AuthViewModel>.value(
-        value: authViewModel,
+      ChangeNotifierProvider(
+        create: (_) => AuthViewModel(
+          signInUser: signInUser,
+          signUpUser: signUpUser,
+          getCurrentUser: getCurrentUser,
+          signOutUser: signOutUser,
+        ),
       ),
     ],
-    child: const MyApp(), // Aquí aseguramos que el `MyApp` es pasado como `child`
+    child: const MyApp(), // Aseguramos que el child sea la clase MyApp
   );
 }
+
+
+Future<void> initializeAppCheck() async {
+  try {
+    await FirebaseAppCheck.instance.activate(
+      androidProvider: AndroidProvider.debug, // Token de prueba para Android
+      appleProvider: AppleProvider.debug,     // Token de prueba para iOS
+    );
+    print('Firebase App Check activado con éxito');
+  } catch (e) {
+    print('Error al activar Firebase App Check: $e');
+  }
+}
+
+

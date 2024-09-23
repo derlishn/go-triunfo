@@ -1,10 +1,10 @@
-import '../../resources/strings.dart';
+import '../../strings/app_strings.dart';
 
 class Validators {
   // Validación de campo vacío
   static String? validateNotEmpty(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Este campo no puede estar vacío';
+      return AppStrings.errorEmptyFields; // Usando AppStrings
     }
     return null; // Si todo está bien, no hay errores
   }
@@ -22,7 +22,7 @@ class Validators {
     if (value.isEmpty) {
       return AppStrings.errorPasswordRequired;
     } else if (value.length < 6) {
-      return 'La contraseña debe tener 6 characters o más';
+      return AppStrings.errorPasswordTooShort; // Usando AppStrings
     }
     return null;
   }
@@ -30,14 +30,14 @@ class Validators {
   // Valida el nombre
   static String? validateName(String? value) {
     if (value == null || value.isEmpty) {
-      return 'El nombre no puede estar vacío';
+      return AppStrings.errorDisplayNameRequired;
     }
     if (value.length < 2) {
-      return 'El nombre debe tener al menos 2 caracteres';
+      return AppStrings.errorNameTooShort; // Usando AppStrings
     }
     final nameRegex = RegExp(r'^[a-zA-Z\s]+$');
     if (!nameRegex.hasMatch(value)) {
-      return 'El nombre solo debe contener letras y espacios';
+      return AppStrings.errorNameInvalid; // Usando AppStrings
     }
     return null;
   }
@@ -45,10 +45,10 @@ class Validators {
   // Valida la confirmación de contraseña
   static String? validateConfirmPassword(String? password, String? confirmPassword) {
     if (confirmPassword == null || confirmPassword.isEmpty) {
-      return 'Debes confirmar tu contraseña';
+      return AppStrings.errorConfirmPasswordRequired; // Usando AppStrings
     }
     if (confirmPassword != password) {
-      return 'Las contraseñas no coinciden';
+      return AppStrings.errorPasswordsDoNotMatch; // Usando AppStrings
     }
     return null;
   }

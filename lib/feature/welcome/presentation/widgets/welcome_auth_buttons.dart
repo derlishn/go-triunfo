@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_triunfo/core/resources/strings.dart';
-import 'package:go_triunfo/core/utils/navigation/navigator_helper.dart';
+import 'package:go_triunfo/core/strings/app_strings.dart';
+import 'package:go_triunfo/core/utils/helpers/navigator_helper.dart';
 import 'package:go_triunfo/feature/auth/presentation/screens/login_screen.dart';
 import 'package:go_triunfo/feature/auth/presentation/screens/register_screen.dart';
 

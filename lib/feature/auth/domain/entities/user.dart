@@ -1,14 +1,17 @@
+import 'address.dart';
+import 'enums.dart';
+
 class User {
   final String uid;
   final String email;
   final String displayName;
   final String? phoneNumber;
-  final String? address;
-  final String? photoUrl; // Se maneja el photoUrl como opcional
+  final Address? address;
+  final String? photoUrl;
   final DateTime createdAt;
-  final String role; // Role of the user: client, admin, etc.
-  final String gender; // Gender field added
-  final int orders; // Número de órdenes, inicialmente 0
+  final UserRole role;
+  final Gender gender;
+  final int orders;
 
   User({
     required this.uid,
@@ -17,23 +20,22 @@ class User {
     this.phoneNumber,
     this.address,
     this.photoUrl,
-    required this.createdAt,
-    this.role = 'client',
-    this.gender = 'not specified', // Valor por defecto
-    this.orders = 0, // Inicialmente 0 órdenes
-  });
+    DateTime? createdAt,
+    this.role = UserRole.client,
+    this.gender = Gender.notSpecified,
+    this.orders = 0,
+  }) : createdAt = createdAt ?? DateTime.now();
 
-  // CopyWith method to facilitate updating specific fields
   User copyWith({
     String? uid,
     String? email,
     String? displayName,
     String? phoneNumber,
-    String? address,
+    Address? address,
     String? photoUrl,
     DateTime? createdAt,
-    String? role,
-    String? gender,
+    UserRole? role,
+    Gender? gender,
     int? orders,
   }) {
     return User(

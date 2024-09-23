@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:go_triunfo/core/utils/helpers/phone_number_input_formatter.dart';
+import 'package:go_triunfo/feature/auth/domain/entities/address.dart';
+import 'package:go_triunfo/feature/auth/domain/entities/enums.dart';
+import 'package:go_triunfo/feature/auth/domain/entities/user.dart';
 import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
 import 'package:provider/provider.dart';
-import 'package:go_triunfo/core/resources/strings.dart';
+import 'package:go_triunfo/core/strings/app_strings.dart';
 import 'package:go_triunfo/core/utils/helpers/validators.dart';
-import 'package:go_triunfo/core/utils/widgets/showCustomSnackBar.dart';
-import 'package:go_triunfo/core/utils/navigation/navigator_helper.dart';
+import 'package:go_triunfo/core/utils/widgets/show_custom_snackbar.dart';
+import 'package:go_triunfo/core/utils/helpers/navigator_helper.dart';
 import 'package:go_triunfo/feature/home/presentation/screens/home_screen.dart';
+
+
 
 class RegisterForm extends StatefulWidget {
   const RegisterForm({super.key});
 
   @override
-
-  _RegisterFormState createState() => _RegisterFormState();
+  State<RegisterForm> createState() => _RegisterFormState();
 }
 
 class _RegisterFormState extends State<RegisterForm> {
@@ -23,7 +29,7 @@ class _RegisterFormState extends State<RegisterForm> {
   final TextEditingController _displayNameController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  String? _selectedGender; // Variable para el género seleccionado
+  Gender? _selectedGender;
 
   @override
   Widget build(BuildContext context) {
@@ -122,19 +128,52 @@ class _RegisterFormState extends State<RegisterForm> {
               // Phone Number
               TextFormField(
                 controller: _phoneNumberController,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: AppStrings.phoneHintText,
-                  prefixIcon: Icon(Icons.phone),
-                  labelStyle: TextStyle(fontSize: 16),
-                  border: OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.phone),
+                  labelStyle: const TextStyle(fontSize: 16),
+                  filled: true, // Añade un fondo detrás del campo
+                  fillColor: Colors.grey[200], // Color de fondo
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15), // Bordes redondeados
+                    borderSide: BorderSide.none, // Sin borde visible (solo sombra)
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: Colors.blue, width: 2), // Borde cuando está enfocado
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: const BorderSide(color: Colors.red, width: 2), // Borde en caso de error
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16), // Espacio interno
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
-                keyboardType: TextInputType.phone,
-                validator: (value) => value != null && value.isNotEmpty
-                    ? null
-                    : AppStrings.errorPhoneRequired,
+                keyboardType: TextInputType.number,
+                maxLength: 9, // Limita a 9 caracteres incluyendo los guiones
+                style: const TextStyle(
+                  fontSize: 18, // Tamaño de fuente más grande
+                  letterSpacing: 2.0, // Espaciado entre caracteres
+                ),
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly, // Solo permite números
+                  PhoneNumberInputFormatter(), // Formateador personalizado
+                ],
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return AppStrings.errorPhoneRequired;
+                  } else if (value.length != 9) {
+                    return 'Debe ingresar 8 números';
+                  }
+                  return null;
+                },
                 onChanged: (value) => authViewModel.clearMessages(),
               ),
               const SizedBox(height: 20),
+
               // Address
               TextFormField(
                 controller: _addressController,
@@ -151,8 +190,7 @@ class _RegisterFormState extends State<RegisterForm> {
                 onChanged: (value) => authViewModel.clearMessages(),
               ),
               const SizedBox(height: 20),
-              // Gender (Dropdown)
-              DropdownButtonFormField<String>(
+              DropdownButtonFormField<Gender>(
                 value: _selectedGender,
                 decoration: const InputDecoration(
                   labelText: AppStrings.gendertitle,
@@ -160,12 +198,17 @@ class _RegisterFormState extends State<RegisterForm> {
                   labelStyle: TextStyle(fontSize: 16),
                   border: OutlineInputBorder(),
                 ),
-                items: [AppStrings.maleGenderText, AppStrings.femaleGenderText, AppStrings.otherGenderText]
+                items: Gender.values
                     .map((gender) => DropdownMenuItem(
                   value: gender,
                   child: Text(
-                    gender,
+                    gender == Gender.male
+                        ? AppStrings.maleGenderText
+                        : gender == Gender.female
+                        ? AppStrings.femaleGenderText
+                        : AppStrings.otherGenderText,
                     style: TextStyle(
+                      fontWeight: FontWeight.normal,
                       color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
@@ -183,38 +226,40 @@ class _RegisterFormState extends State<RegisterForm> {
               ),
               const SizedBox(height: 20),
               // Register Button
-              // Register Button
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    // Limpia los mensajes previos
                     authViewModel.clearMessages();
+                    Address address = Address(location: _addressController.text);
 
-                    // Llama al método de registro
-                    await authViewModel.register(
+                    User user = User(
+                      uid: '',
                       email: _emailController.text,
-                      password: _passwordController.text,
                       displayName: _displayNameController.text,
                       phoneNumber: _phoneNumberController.text,
-                      address: _addressController.text,
+                      address: address,
+                      createdAt: DateTime.now(),
                       gender: _selectedGender!,
                     );
 
-                    if (authViewModel.signUpErrorMessage != null) {
-                      // Asegúrate de mostrar el mensaje de error con `isError: true`.
+                    await authViewModel.signUp(
+                      user,
+                      _passwordController.text,
+                    );
+
+                    if (authViewModel.errorMessage != null) {
                       showCustomSnackBar(
                         context,
-                        authViewModel.signUpErrorMessage!,
+                        authViewModel.errorMessage!,
                         isError: true,
                       );
-                    } else if (authViewModel.successMessage != null) {
+                    } else if (authViewModel.user != null) {
                       showCustomSnackBar(
                         context,
-                        authViewModel.successMessage!,
-                        isError: false, // Verde para mensajes de éxito
+                        'Registro exitoso',
+                        isError: false,
                       );
-                      // Navegar a HomeScreen después de éxito
-                      replaceAndRemoveUntil(context, const HomeScreen());
+                      replaceAndRemoveUntil(context, HomeScreen());
                     }
                   }
                 },
@@ -233,6 +278,31 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
         ),
       ),
+    );
+  }
+}
+
+
+class _PhoneNumberInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text.length > 8) return oldValue;
+
+    String newText = newValue.text.replaceAll(RegExp(r'\D'), '');
+
+    final buffer = StringBuffer();
+
+    for (int i = 0; i < newText.length; i++) {
+      buffer.write(newText[i]);
+      if (i == 3 && newText.length > 4) {
+        buffer.write('-');
+      }
+    }
+
+    return newValue.copyWith(
+      text: buffer.toString(),
+      selection: TextSelection.collapsed(offset: buffer.length),
     );
   }
 }

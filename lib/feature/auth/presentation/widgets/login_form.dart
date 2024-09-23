@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
+import 'package:go_triunfo/core/strings/app_strings.dart';
 import 'package:provider/provider.dart';
-import 'package:go_triunfo/core/resources/strings.dart';
 import 'package:go_triunfo/core/utils/helpers/validators.dart';
-import 'package:go_triunfo/core/utils/widgets/showCustomSnackBar.dart';
-import 'package:go_triunfo/core/utils/navigation/navigator_helper.dart';
+import 'package:go_triunfo/core/utils/widgets/show_custom_snackbar.dart';
+import 'package:go_triunfo/core/utils/helpers/navigator_helper.dart';
 import 'package:go_triunfo/feature/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:go_triunfo/feature/home/presentation/screens/home_screen.dart';
+import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart'; // Importamos el nuevo ViewModel
 
 class LoginForm extends StatefulWidget {
   const LoginForm({super.key});
 
   @override
-  _LoginFormState createState() => _LoginFormState();
+  State<LoginForm> createState() => _LoginFormState();
 }
 
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+
+  bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -52,28 +54,30 @@ class _LoginFormState extends State<LoginForm> {
                 ),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) => Validators.emailValidator(value!),
-                onChanged: (value) => authViewModel.clearMessages(),
               ),
               const SizedBox(height: 20),
               // Password field
               TextFormField(
                 controller: _passwordController,
-                obscureText: !authViewModel.isPasswordVisible,
+                obscureText: !_isPasswordVisible,
                 decoration: InputDecoration(
                   labelText: AppStrings.passwordHintText,
                   labelStyle: const TextStyle(fontSize: 16),
                   border: const OutlineInputBorder(),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      authViewModel.isPasswordVisible
+                      _isPasswordVisible
                           ? Icons.visibility
                           : Icons.visibility_off,
                     ),
-                    onPressed: authViewModel.togglePasswordVisibility,
+                    onPressed: () {
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
+                    },
                   ),
                 ),
                 validator: (value) => Validators.passwordValidator(value!),
-                onChanged: (value) => authViewModel.clearMessages(),
               ),
               Align(
                 alignment: Alignment.centerRight,
@@ -95,33 +99,28 @@ class _LoginFormState extends State<LoginForm> {
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    await authViewModel.login(
+                    await authViewModel.signIn(
                       _emailController.text,
                       _passwordController.text,
                     );
 
-                    if (authViewModel.loginErrorMessage != null) {
+                    if (authViewModel.errorMessage != null) {
                       showCustomSnackBar(
                         context,
-                        authViewModel.loginErrorMessage!,
+                        authViewModel.errorMessage!,
                         isError: true,
                       );
-                    } else if (authViewModel.successMessage != null) {
+                    } else if (authViewModel.user != null) {
                       showCustomSnackBar(
                         context,
-                        authViewModel.successMessage!,
-                        isError: false, // Verde para mensajes de éxito
+                        'Inicio de sesión exitoso',
+                        isError: false,
                       );
                       // Navegar a HomeScreen después de éxito
-                      replaceAndRemoveUntil(context, const HomeScreen());
+                      replaceAndRemoveUntil(context, HomeScreen());
                     }
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  textStyle: const TextStyle(fontSize: 18),
-                ),
                 child: authViewModel.isLoading
                     ? const CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),

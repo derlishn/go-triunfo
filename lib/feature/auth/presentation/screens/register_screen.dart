@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_triunfo/core/resources/strings.dart';
+import 'package:go_triunfo/core/strings/app_strings.dart';
 import 'package:go_triunfo/feature/auth/presentation/widgets/login_redirect.dart';
 import 'package:go_triunfo/feature/auth/presentation/widgets/register_form.dart';
 
@@ -16,7 +16,7 @@ class RegisterScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Padding(
+      body: const Padding(
         padding: EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(

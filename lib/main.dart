@@ -1,32 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:go_triunfo/core/strings/app_strings.dart';
+import 'package:go_triunfo/core/theme/app_theme.dart';
 import 'package:go_triunfo/feature/welcome/presentation/screens/welcome_screen.dart';
-import 'core/resources/theme.dart';
-import 'app_initializer.dart';  // Importar la función de inicialización
-import 'firebase_options.dart';  // Importar el archivo generado por Firebase CLI
+import 'app_initializer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Inicializar Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
-  // Inicializar la app y obtener el MultiProvider con los ViewModels
   final appProvider = await initializeApp();
-
-  // Ejecutar la aplicación con el MultiProvider correctamente configurado
   runApp(appProvider);
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'GoTriunfo App',
+      title: AppStrings.titleApp,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

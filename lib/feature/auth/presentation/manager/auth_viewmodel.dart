@@ -1,199 +1,116 @@
 import 'package:flutter/material.dart';
-import 'package:go_triunfo/core/utils/navigation/navigator_helper.dart';
 import 'package:go_triunfo/feature/auth/domain/entities/user.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/get_current_user.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/sign_in_user.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/sign_out_user.dart';
-import 'package:go_triunfo/feature/auth/domain/use_cases/sign_up_user.dart';
+import 'package:dartz/dartz.dart';
 import 'package:go_triunfo/core/errors/failures.dart';
-import 'package:go_triunfo/core/resources/strings.dart';
-import 'package:go_triunfo/feature/welcome/presentation/screens/welcome_screen.dart';
+import '../../../../core/usecases/usecase.dart';
+import '../../domain/use_cases/get_current_user.dart';
+import '../../domain/use_cases/sign_in_user.dart';
+import '../../domain/use_cases/sign_out_user.dart';
+import '../../domain/use_cases/sign_up_user.dart';
 
-class AuthViewModel extends ChangeNotifier {
-  final GetCurrentUser getCurrentUserUseCase;
-  final SignInUser signInUserUseCase;
-  final SignUpUser signUpUserUseCase;
-  final SignOutUser signOutUserUseCase;
+class AuthViewModel with ChangeNotifier {
+  final SignInUser signInUser;
+  final SignUpUser signUpUser;
+  final GetCurrentUser getCurrentUser;
+  final SignOutUser signOutUser;
 
-  AuthViewModel({
-    required this.getCurrentUserUseCase,
-    required this.signInUserUseCase,
-    required this.signUpUserUseCase,
-    required this.signOutUserUseCase,
-  });
+  User? _user;
+  User? get user => _user;
 
-  // User Data
-  User? _currentUser;
-  User? get currentUser => _currentUser;
-
-  // Loading State
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  // Password Visibility State
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
   bool _isPasswordVisible = false;
   bool get isPasswordVisible => _isPasswordVisible;
 
-  // Error Messages for Different Operations
-  String? _loginErrorMessage;
-  String? _signUpErrorMessage;
-  String? _generalErrorMessage;
+  AuthViewModel({
+    required this.signInUser,
+    required this.signUpUser,
+    required this.getCurrentUser,
+    required this.signOutUser,
+  });
 
-  String? get loginErrorMessage => _loginErrorMessage;
-  String? get signUpErrorMessage => _signUpErrorMessage;
-  String? get generalErrorMessage => _generalErrorMessage;
+  // Iniciar sesión
+  Future<void> signIn(String email, String password) async {
+    _setLoading(true);
+    final result = await signInUser.call(SignInParams(email: email, password: password));
+    _handleAuthResult(result);
+    _setLoading(false);
+  }
 
-  // Success Message
-  String? _successMessage;
-  String? get successMessage => _successMessage;
+  // Registrar usuario
+  Future<void> signUp(User user, String password) async {
+    _setLoading(true);
+    final result = await signUpUser.call(SignUpParams(user: user, password: password));
+    _handleAuthResult(result);
+    _setLoading(false);
+  }
 
-  // Toggle password visibility
+  // Limpiar mensajes de error
+  void clearMessages() {
+    _errorMessage = null;
+    notifyListeners();
+  }
+
+  // Mostrar/ocultar contraseña
   void togglePasswordVisibility() {
     _isPasswordVisible = !_isPasswordVisible;
     notifyListeners();
   }
 
-  Future<void> fetchCurrentUser() async {
+  // Obtener el usuario actual
+  Future<void> checkCurrentUser() async {
     _setLoading(true);
-    clearMessages();
-
-    final result = await getCurrentUserUseCase.call();
-    result.fold(
-          (failure) => _handleError(failure, "getCurrentUser"),
-          (user) => _handleSuccessUser(user),
-    );
-
-    _setLoading(false);
-  }
-
-  Future<void> logout(BuildContext context) async {
-    _setLoading(true);
-    clearMessages();
-
-    final result = await signOutUserUseCase.call();
-    result.fold(
-          (failure) => _handleError(failure, "logout"),
-          (_) {
-        _currentUser = null;
-        replaceWith(context, const WelcomeScreen());
-        _successMessage = AppStrings.successLoggedOut;
-      },
-    );
-
-    _setLoading(false);
-  }
-
-  Future<void> register({
-    required String email,
-    required String password,
-    required String displayName,
-    String? phoneNumber,
-    String? address,
-    required String gender,
-  }) async {
-    _setLoading(true);
-    clearMessages();
-
-    final user = User(
-      uid: '', // El UID será generado por Firebase
-      email: email,
-      displayName: displayName,
-      phoneNumber: phoneNumber,
-      address: address,
-      createdAt: DateTime.now(),
-      role: 'client',
-      gender: gender,
-      orders: 0, // Órdenes iniciales en 0
-    );
-
-    final result = await signUpUserUseCase.call(user, password);
-
+    final result = await getCurrentUser.call(NoParams());
     result.fold(
           (failure) {
-        _handleError(failure, "signUp");
+        _errorMessage = failure.message; // Directamente obtenemos el mensaje del error
+        _user = null;
       },
-          (registeredUser) {
-        _handleSuccessUser(registeredUser);
-        _successMessage = AppStrings.successUserCreated;
+          (user) {
+        _user = user;
       },
     );
-
     _setLoading(false);
+    notifyListeners();
   }
 
-
-  // Login User
-  Future<void> login(String email, String password) async {
+  // Cerrar sesión
+  Future<void> signOut() async {
     _setLoading(true);
-    clearMessages();
-
-    final result = await signInUserUseCase.call(SignInParams(email: email, password: password));
-
+    final result = await signOutUser.call(NoParams());
     result.fold(
-            (failure) => _handleError(failure, "login"),
-            (user) {
-          _handleSuccessUser(user);
-          _successMessage = AppStrings.operationSuccess;
-          notifyListeners();  // Asegúrate de notificar cambios para actualizar la UI.
-        }
+          (failure) {
+        _errorMessage = failure.message; // Usamos el mensaje del error desde Failure
+      },
+          (success) {
+        _user = null;
+      },
     );
-
     _setLoading(false);
-  }
-
-
-
-  // Clear Error and Success Messages
-  void clearMessages() {
-    _loginErrorMessage = null;
-    _signUpErrorMessage = null;
-    _generalErrorMessage = null;
-    _successMessage = null;
     notifyListeners();
   }
 
-  // Helper: Set loading state
-  void _setLoading(bool loading) {
-    _isLoading = loading;
+  // Manejar los resultados de autenticación
+  void _handleAuthResult(Either<Failure, User> result) {
+    result.fold(
+          (failure) {
+        _errorMessage = failure.message; // Ahora el mensaje de error viene directamente del Failure
+      },
+          (user) {
+        _user = user;
+        _errorMessage = null;
+      },
+    );
     notifyListeners();
   }
 
-  // Helper: Handle Success for User Retrieval
-  void _handleSuccessUser(User? user) {
-    if (user != null) {
-      _currentUser = user;
-      _successMessage = AppStrings.operationSuccess;
-      clearMessages();
-    } else {
-      _generalErrorMessage = AppStrings.errorGeneral;
-    }
-    notifyListeners();
-  }
-
-  void _handleError(Failure failure, String operationType) {
-    String message;
-
-    if (failure is NetworkFailure) {
-      message = failure.message;  // Asegúrate de que el mensaje se propaga
-    } else if (failure is ServerFailure) {
-      message = failure.message;  // Accede al mensaje de ServerFailure
-    } else {
-      message = 'Ocurrió un error desconocido';
-    }
-
-    // Dependiendo de la operación, asigna el mensaje correcto
-    switch (operationType) {
-      case "login":
-        _loginErrorMessage = message;
-        break;
-      case "signUp":
-        _signUpErrorMessage = message;
-        break;
-      default:
-        _generalErrorMessage = message;
-        break;
-    }
-
+  // Manejar el estado de carga
+  void _setLoading(bool value) {
+    _isLoading = value;
     notifyListeners();
   }
 }

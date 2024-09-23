@@ -19,3 +19,7 @@ class ValidationFailure extends Failure {
 class NetworkFailure extends Failure {
   NetworkFailure(super.message);
 }
+
+class UnexpectedFailure extends Failure {
+  UnexpectedFailure(String message) : super(message);
+}

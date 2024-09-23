@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_triunfo/core/resources/strings.dart';
+import 'package:go_triunfo/core/strings/app_strings.dart';
 import 'package:go_triunfo/feature/auth/presentation/widgets/login_form.dart';
 import 'package:go_triunfo/feature/auth/presentation/widgets/register_direct.dart';
 import 'package:go_triunfo/feature/auth/presentation/widgets/social_login_buttons.dart';
