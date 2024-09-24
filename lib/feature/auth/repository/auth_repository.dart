@@ -22,6 +22,7 @@ class AuthRepository {
 
       return userDTO;
     } catch (e) {
+      print('Error during sign-up: $e');  // Debugging purposes
       throw Exception(AuthErrors.getMessage(e));
     }
   }
@@ -45,6 +46,7 @@ class AuthRepository {
       UserDTO userDTO = UserDTO.fromMap(doc.data()!);
       return userDTO;
     } catch (e) {
+      print('Error during sign-in: $e');  // Debugging purposes
       throw Exception(AuthErrors.getMessage(e));
     }
   }
@@ -56,7 +58,10 @@ class AuthRepository {
         return null;
       }
 
-      DocumentSnapshot<Map<String, dynamic>> doc = await _firestore.collection('users').doc(user.uid).get();
+      DocumentSnapshot<Map<String, dynamic>> doc = await _firestore
+          .collection('users')
+          .doc(user.uid)
+          .get();
 
       if (!doc.exists) {
         return null;
@@ -65,6 +70,7 @@ class AuthRepository {
       UserDTO userDTO = UserDTO.fromMap(doc.data()!);
       return userDTO;
     } catch (e) {
+      print('Error getting current user: $e');  // Debugging purposes
       throw Exception('Error al obtener el usuario actual.');
     }
   }
@@ -73,8 +79,20 @@ class AuthRepository {
     try {
       await _auth.signOut();
     } catch (e) {
+      print('Error during sign-out: $e');  // Debugging purposes
       throw Exception('Error al cerrar sesión.');
     }
+  }
+
+  Stream<UserDTO> listenToUserUpdates(String uid) {
+    return _firestore.collection('users').doc(uid).snapshots().map((snapshot) {
+      final data = snapshot.data();
+      if (data != null) {
+        return UserDTO.fromJson(data);  // Convertir a UserDTO
+      } else {
+        throw Exception('No se encontraron datos de usuario.');
+      }
+    });
   }
 }
 

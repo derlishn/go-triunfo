@@ -7,42 +7,47 @@ import 'package:go_triunfo/core/theme/app_theme.dart';
 import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
 import 'package:go_triunfo/feature/home/presentation/screens/home_screen.dart';
 import 'package:go_triunfo/feature/welcome/presentation/screens/welcome_screen.dart';
+import 'feature/auth/data/models/user_dto.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(); // Inicializar Firebase
   await FirebaseAppCheck.instance.activate(
     androidProvider: AndroidProvider.debug,
-    // Si pruebas en iOS, descomenta la siguiente línea
-    // appleProvider: AppleProvider.debug,
   );
+
+  // Cargar sesión del usuario antes de iniciar la app
+  final authViewModel = AuthViewModel();
+  final UserDTO? currentUser = await authViewModel.loadUserSession(); // Cargar usuario desde SharedPreferences
+  print('Usuario cargado desde SharedPreferences: $currentUser'); // Debug
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthViewModel>(
-          create: (_) => AuthViewModel(),
+          create: (_) => authViewModel,  // Usamos la instancia ya creada
         ),
-        // Agrega otros ViewModels aquí si es necesario
       ],
-      child: const MyApp(),
+      child: MyApp(user: currentUser),
     ),
   );
 }
 
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final UserDTO? user;  // Recibimos el usuario cargado de SharedPreferences
+
+  const MyApp({Key? key, required this.user}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-
     return MaterialApp(
       title: AppStrings.titleApp,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home: WelcomeScreen()
+      home: user != null ? HomeScreen() : const WelcomeScreen(), // Dependiendo si el usuario está cargado o no
     );
   }
 }

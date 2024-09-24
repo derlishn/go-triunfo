@@ -124,7 +124,7 @@ class RegisterForm extends StatelessWidget {
                 errorText: authViewModel.fields.phoneNumberError,
               ),
               onSaved: (PhoneNumber number) {},
-              countries: const ['HN'], // Restricción al código de país de Honduras
+              countries: const ['HN'],
             ),
             const SizedBox(height: 20),
             // Address
@@ -153,20 +153,12 @@ class RegisterForm extends StatelessWidget {
               ),
               items: [
                 DropdownMenuItem(
-                  value: 'no especificado',
-                  child: Text(
-                    'No especificado',
-                    style: TextStyle(
-                      color: isDarkMode ? Colors.white : Colors.black,
-                    ),
-                  ),
-                ),
-                DropdownMenuItem(
                   value: 'masculino',
                   child: Text(
                     AppStrings.maleGenderText,
                     style: TextStyle(
                       color: isDarkMode ? Colors.white : Colors.black,
+                      fontWeight: FontWeight.w400
                     ),
                   ),
                 ),
@@ -176,6 +168,7 @@ class RegisterForm extends StatelessWidget {
                     AppStrings.femaleGenderText,
                     style: TextStyle(
                       color: isDarkMode ? Colors.white : Colors.black,
+                        fontWeight: FontWeight.w400
                     ),
                   ),
                 ),
@@ -185,6 +178,7 @@ class RegisterForm extends StatelessWidget {
                     AppStrings.otherGenderText,
                     style: TextStyle(
                       color: isDarkMode ? Colors.white : Colors.black,
+                        fontWeight: FontWeight.w400
                     ),
                   ),
                 ),

@@ -107,6 +107,11 @@ class LoginForm extends StatelessWidget {
                   replaceAndRemoveUntil(context, HomeScreen());
                 }
               },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                textStyle: const TextStyle(fontSize: 18),
+              ),
               child: authViewModel.isLoading
                   ? const CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),

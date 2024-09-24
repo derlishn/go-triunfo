@@ -33,7 +33,9 @@ class UserDTO {
       phoneNumber: data['phoneNumber'],
       address: data['address'],
       photoUrl: data['photoUrl'],
-      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      createdAt: (data['createdAt'] is Timestamp) // Manejar el tipo Timestamp de Firebase
+          ? (data['createdAt'] as Timestamp).toDate()
+          : DateTime.parse(data['createdAt']),
       role: data['role'] ?? 'cliente',
       gender: data['gender'] ?? 'no especificado',
       orders: data['orders'] ?? 0,
@@ -48,7 +50,7 @@ class UserDTO {
       'phoneNumber': phoneNumber,
       'address': address,
       'photoUrl': photoUrl,
-      'createdAt': Timestamp.fromDate(createdAt),
+      'createdAt': Timestamp.fromDate(createdAt), // Guardar como Timestamp para Firebase
       'role': role,
       'gender': gender,
       'orders': orders,
@@ -78,6 +80,38 @@ class UserDTO {
       role: role ?? this.role,
       gender: gender ?? this.gender,
       orders: orders ?? this.orders,
+    );
+  }
+
+  // Convertir UserDTO a un Map (JSON) para SharedPreferences
+  Map<String, dynamic> toJson() {
+    return {
+      'uid': uid,
+      'email': email,
+      'displayName': displayName,
+      'phoneNumber': phoneNumber,
+      'address': address,
+      'photoUrl': photoUrl,
+      'createdAt': createdAt.toIso8601String(), // Guardar como String para SharedPreferences
+      'role': role,
+      'gender': gender,
+      'orders': orders,
+    };
+  }
+
+  // Crear UserDTO desde un Map (JSON) para SharedPreferences
+  factory UserDTO.fromJson(Map<String, dynamic> json) {
+    return UserDTO(
+      uid: json['uid'],
+      email: json['email'],
+      displayName: json['displayName'],
+      phoneNumber: json['phoneNumber'],
+      address: json['address'],
+      photoUrl: json['photoUrl'],
+      createdAt: DateTime.parse(json['createdAt']), // Parsear la fecha desde String
+      role: json['role'],
+      gender: json['gender'],
+      orders: json['orders'],
     );
   }
 }
