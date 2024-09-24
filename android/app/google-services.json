@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "89617423504",
+    "project_id": "go-triunfo-app",
+    "storage_bucket": "go-triunfo-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:89617423504:android:d94028f77c139b05de0c15",
+        "android_client_info": {
+          "package_name": "com.derlisdev.gotriunfo.go_triunfo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApUEToKkS0n99fcf1Z1SPVOHiQds3m9Lo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
