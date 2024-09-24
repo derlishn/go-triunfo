@@ -144,7 +144,7 @@ class RegisterForm extends StatelessWidget {
             const SizedBox(height: 20),
             // Gender Dropdown
             DropdownButtonFormField<String>(
-              value: authViewModel.fields.gender,
+              value: authViewModel.fields.gender.isNotEmpty ? authViewModel.fields.gender : null,
               decoration: InputDecoration(
                 labelText: AppStrings.gendertitle,
                 prefixIcon: const Icon(Icons.person_outline),
@@ -158,7 +158,7 @@ class RegisterForm extends StatelessWidget {
                     AppStrings.maleGenderText,
                     style: TextStyle(
                       color: isDarkMode ? Colors.white : Colors.black,
-                      fontWeight: FontWeight.w400
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
@@ -168,17 +168,17 @@ class RegisterForm extends StatelessWidget {
                     AppStrings.femaleGenderText,
                     style: TextStyle(
                       color: isDarkMode ? Colors.white : Colors.black,
-                        fontWeight: FontWeight.w400
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),
                 DropdownMenuItem(
-                  value: 'otro',
+                  value: 'no especificado', // Asegúrate de agregar esta opción
                   child: Text(
-                    AppStrings.otherGenderText,
+                    'No especificado', // El texto que quieres mostrar
                     style: TextStyle(
                       color: isDarkMode ? Colors.white : Colors.black,
-                        fontWeight: FontWeight.w400
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ),

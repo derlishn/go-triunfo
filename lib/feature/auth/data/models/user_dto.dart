@@ -99,7 +99,6 @@ class UserDTO {
     };
   }
 
-  // Crear UserDTO desde un Map (JSON) para SharedPreferences
   factory UserDTO.fromJson(Map<String, dynamic> json) {
     return UserDTO(
       uid: json['uid'],
@@ -108,10 +107,13 @@ class UserDTO {
       phoneNumber: json['phoneNumber'],
       address: json['address'],
       photoUrl: json['photoUrl'],
-      createdAt: DateTime.parse(json['createdAt']), // Parsear la fecha desde String
+      createdAt: json['createdAt'] is Timestamp
+          ? (json['createdAt'] as Timestamp).toDate()
+          : DateTime.parse(json['createdAt']),  // Asegura que maneje ambos tipos
       role: json['role'],
       gender: json['gender'],
       orders: json['orders'],
     );
   }
+
 }
