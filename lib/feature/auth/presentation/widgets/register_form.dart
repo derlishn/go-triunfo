@@ -1,35 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:go_triunfo/core/utils/helpers/phone_number_input_formatter.dart';
-import 'package:go_triunfo/feature/auth/domain/entities/address.dart';
-import 'package:go_triunfo/feature/auth/domain/entities/enums.dart';
-import 'package:go_triunfo/feature/auth/domain/entities/user.dart';
-import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
 import 'package:provider/provider.dart';
 import 'package:go_triunfo/core/strings/app_strings.dart';
-import 'package:go_triunfo/core/utils/helpers/validators.dart';
-import 'package:go_triunfo/core/utils/widgets/show_custom_snackbar.dart';
 import 'package:go_triunfo/core/utils/helpers/navigator_helper.dart';
-import 'package:go_triunfo/feature/home/presentation/screens/home_screen.dart';
+import 'package:go_triunfo/core/utils/widgets/show_custom_snackbar.dart';
+import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart'; // Importar el paquete
+import '../../../home/presentation/screens/home_screen.dart';
 
-
-
-class RegisterForm extends StatefulWidget {
-  const RegisterForm({super.key});
-
-  @override
-  State<RegisterForm> createState() => _RegisterFormState();
-}
-
-class _RegisterFormState extends State<RegisterForm> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  final TextEditingController _displayNameController = TextEditingController();
-  final TextEditingController _phoneNumberController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  Gender? _selectedGender;
+class RegisterForm extends StatelessWidget {
+  const RegisterForm({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,272 +16,211 @@ class _RegisterFormState extends State<RegisterForm> {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
 
+    // Controlador para el número de teléfono
+    final TextEditingController phoneController = TextEditingController();
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppStrings.registerHeader,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 28,
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppStrings.registerHeader,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w500,
+                fontSize: 28,
               ),
-              const SizedBox(height: 8),
-              const Text(AppStrings.registerSubHeader),
-              const SizedBox(height: 40),
-              // Display Name
-              TextFormField(
-                controller: _displayNameController,
-                decoration: const InputDecoration(
-                  labelText: AppStrings.displayNameHintText,
-                  prefixIcon: Icon(Icons.person),
-                  labelStyle: TextStyle(fontSize: 16),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) => value != null && value.isNotEmpty
-                    ? null
-                    : AppStrings.errorDisplayNameRequired,
-                onChanged: (value) => authViewModel.clearMessages(),
+            ),
+            const SizedBox(height: 8),
+            const Text(AppStrings.registerSubHeader),
+            const SizedBox(height: 40),
+            // Display Name
+            TextField(
+              onChanged: authViewModel.setDisplayName,
+              decoration: InputDecoration(
+                labelText: AppStrings.displayNameHintText,
+                prefixIcon: const Icon(Icons.person),
+                labelStyle: const TextStyle(fontSize: 16),
+                border: const OutlineInputBorder(),
+                errorText: authViewModel.displayNameError,
               ),
-              const SizedBox(height: 20),
-              // Email
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: AppStrings.emailHintText,
-                  prefixIcon: Icon(Icons.email),
-                  labelStyle: TextStyle(fontSize: 16),
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) => Validators.emailValidator(value!),
-                onChanged: (value) => authViewModel.clearMessages(),
+            ),
+            const SizedBox(height: 20),
+            // Email
+            TextField(
+              onChanged: authViewModel.setEmail,
+              decoration: InputDecoration(
+                labelText: AppStrings.emailHintText,
+                prefixIcon: const Icon(Icons.email),
+                labelStyle: const TextStyle(fontSize: 16),
+                border: const OutlineInputBorder(),
+                errorText: authViewModel.emailError,
               ),
-              const SizedBox(height: 20),
-              // Password
-              TextFormField(
-                controller: _passwordController,
-                obscureText: !authViewModel.isPasswordVisible,
-                decoration: InputDecoration(
-                  labelText: AppStrings.passwordHintText,
-                  prefixIcon: const Icon(Icons.lock),
-                  labelStyle: const TextStyle(fontSize: 16),
-                  border: const OutlineInputBorder(),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      authViewModel.isPasswordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: authViewModel.togglePasswordVisibility,
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 20),
+            // Password
+            TextField(
+              onChanged: authViewModel.setPassword,
+              obscureText: !authViewModel.isPasswordVisible,
+              decoration: InputDecoration(
+                labelText: AppStrings.passwordHintText,
+                prefixIcon: const Icon(Icons.lock),
+                labelStyle: const TextStyle(fontSize: 16),
+                border: const OutlineInputBorder(),
+                errorText: authViewModel.passwordError,
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    authViewModel.isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
                   ),
+                  onPressed: authViewModel.togglePasswordVisibility,
                 ),
-                validator: (value) => Validators.passwordValidator(value!),
-                onChanged: (value) => authViewModel.clearMessages(),
               ),
-              const SizedBox(height: 20),
-              // Confirm Password
-              TextFormField(
-                controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: AppStrings.confirmPasswordHintText,
-                  prefixIcon: Icon(Icons.lock),
-                  labelStyle: TextStyle(fontSize: 16),
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value != _passwordController.text) {
-                    return AppStrings.errorPasswordsDoNotMatch;
-                  }
-                  return null;
-                },
-                onChanged: (value) => authViewModel.clearMessages(),
+            ),
+            const SizedBox(height: 20),
+            // Confirm Password
+            TextField(
+              onChanged: authViewModel.setConfirmPassword,
+              obscureText: true,
+              decoration: InputDecoration(
+                labelText: AppStrings.confirmPasswordHintText,
+                prefixIcon: const Icon(Icons.lock),
+                labelStyle: const TextStyle(fontSize: 16),
+                border: const OutlineInputBorder(),
+                errorText: authViewModel.confirmPasswordError,
               ),
-              const SizedBox(height: 20),
-              // Phone Number
-              TextFormField(
-                controller: _phoneNumberController,
-                decoration: InputDecoration(
-                  labelText: AppStrings.phoneHintText,
-                  prefixIcon: const Icon(Icons.phone),
-                  labelStyle: const TextStyle(fontSize: 16),
-                  filled: true, // Añade un fondo detrás del campo
-                  fillColor: Colors.grey[200], // Color de fondo
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15), // Bordes redondeados
-                    borderSide: BorderSide.none, // Sin borde visible (solo sombra)
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: const BorderSide(color: Colors.blue, width: 2), // Borde cuando está enfocado
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: const BorderSide(color: Colors.red, width: 2), // Borde en caso de error
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16), // Espacio interno
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                keyboardType: TextInputType.number,
-                maxLength: 9, // Limita a 9 caracteres incluyendo los guiones
-                style: const TextStyle(
-                  fontSize: 18, // Tamaño de fuente más grande
-                  letterSpacing: 2.0, // Espaciado entre caracteres
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly, // Solo permite números
-                  PhoneNumberInputFormatter(), // Formateador personalizado
-                ],
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return AppStrings.errorPhoneRequired;
-                  } else if (value.length != 9) {
-                    return 'Debe ingresar 8 números';
-                  }
-                  return null;
-                },
-                onChanged: (value) => authViewModel.clearMessages(),
+            ),
+            const SizedBox(height: 20),
+            // Phone Number
+            InternationalPhoneNumberInput(
+              onInputChanged: (PhoneNumber number) {
+                authViewModel.setPhoneNumber(number);
+              },
+              selectorConfig: const SelectorConfig(
+                selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
               ),
-              const SizedBox(height: 20),
-
-              // Address
-              TextFormField(
-                controller: _addressController,
-                decoration: const InputDecoration(
-                  labelText: AppStrings.addressHintText,
-                  prefixIcon: Icon(Icons.location_on),
-                  labelStyle: TextStyle(fontSize: 16),
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.streetAddress,
-                validator: (value) => value != null && value.isNotEmpty
-                    ? null
-                    : AppStrings.errorAddressRequired,
-                onChanged: (value) => authViewModel.clearMessages(),
+              ignoreBlank: false,
+              autoValidateMode: AutovalidateMode.onUserInteraction,
+              initialValue: PhoneNumber(isoCode: 'PE'),
+              textFieldController: phoneController,
+              formatInput: true,
+              inputDecoration: InputDecoration(
+                labelText: AppStrings.phoneHintText,
+                prefixIcon: const Icon(Icons.phone),
+                labelStyle: const TextStyle(fontSize: 16),
+                border: const OutlineInputBorder(),
+                errorText: authViewModel.phoneNumberError,
               ),
-              const SizedBox(height: 20),
-              DropdownButtonFormField<Gender>(
-                value: _selectedGender,
-                decoration: const InputDecoration(
-                  labelText: AppStrings.gendertitle,
-                  prefixIcon: Icon(Icons.person_outline),
-                  labelStyle: TextStyle(fontSize: 16),
-                  border: OutlineInputBorder(),
-                ),
-                items: Gender.values
-                    .map((gender) => DropdownMenuItem(
-                  value: gender,
+              onSaved: (PhoneNumber number) {},
+            ),
+            const SizedBox(height: 20),
+            // Address
+            TextField(
+              onChanged: authViewModel.setAddress,
+              decoration: InputDecoration(
+                labelText: AppStrings.addressHintText,
+                prefixIcon: const Icon(Icons.location_on),
+                labelStyle: const TextStyle(fontSize: 16),
+                border: const OutlineInputBorder(),
+                errorText: authViewModel.addressError,
+              ),
+              keyboardType: TextInputType.streetAddress,
+            ),
+            const SizedBox(height: 20),
+            // Gender Dropdown
+            DropdownButtonFormField<String>(
+              value: authViewModel.gender,
+              decoration: InputDecoration(
+                labelText: AppStrings.gendertitle,
+                prefixIcon: const Icon(Icons.person_outline),
+                labelStyle: const TextStyle(fontSize: 16),
+                border: const OutlineInputBorder(),
+                errorText: authViewModel.genderError,
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: 'no especificado',
                   child: Text(
-                    gender == Gender.male
-                        ? AppStrings.maleGenderText
-                        : gender == Gender.female
-                        ? AppStrings.femaleGenderText
-                        : AppStrings.otherGenderText,
+                    'No especificado',
                     style: TextStyle(
                       fontWeight: FontWeight.normal,
                       color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
-                ))
-                    .toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedGender = value;
-                  });
-                  authViewModel.clearMessages();
-                },
-                validator: (value) => value == null
-                    ? AppStrings.errorGenderRequired
-                    : null,
-              ),
-              const SizedBox(height: 20),
-              // Register Button
-              ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    authViewModel.clearMessages();
-                    Address address = Address(location: _addressController.text);
-
-                    User user = User(
-                      uid: '',
-                      email: _emailController.text,
-                      displayName: _displayNameController.text,
-                      phoneNumber: _phoneNumberController.text,
-                      address: address,
-                      createdAt: DateTime.now(),
-                      gender: _selectedGender!,
-                    );
-
-                    await authViewModel.signUp(
-                      user,
-                      _passwordController.text,
-                    );
-
-                    if (authViewModel.errorMessage != null) {
-                      showCustomSnackBar(
-                        context,
-                        authViewModel.errorMessage!,
-                        isError: true,
-                      );
-                    } else if (authViewModel.user != null) {
-                      showCustomSnackBar(
-                        context,
-                        'Registro exitoso',
-                        isError: false,
-                      );
-                      replaceAndRemoveUntil(context, HomeScreen());
-                    }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  textStyle: const TextStyle(fontSize: 18),
                 ),
-                child: authViewModel.isLoading
-                    ? const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                )
-                    : const Text(AppStrings.registerButtonText),
+                DropdownMenuItem(
+                  value: 'masculino',
+                  child: Text(
+                    AppStrings.maleGenderText,
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'femenino',
+                  child: Text(
+                    AppStrings.femaleGenderText,
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'otro',
+                  child: Text(
+                    AppStrings.otherGenderText,
+                    style: TextStyle(
+                      fontWeight: FontWeight.normal,
+                      color: isDarkMode ? Colors.white : Colors.black,
+                    ),
+                  ),
+                ),
+              ],
+              onChanged: authViewModel.setGender,
+            ),
+            const SizedBox(height: 20),
+            // Register Button
+            ElevatedButton(
+              onPressed: authViewModel.isLoading
+                  ? null
+                  : () async {
+                await authViewModel.signUp();
+
+                if (authViewModel.errorMessage != null) {
+                  showCustomSnackBar(
+                    context,
+                    authViewModel.errorMessage!,
+                    isError: true,
+                  );
+                } else if (authViewModel.currentUser != null) {
+                  showCustomSnackBar(
+                    context,
+                    'Registro exitoso',
+                    isError: false,
+                  );
+                  replaceAndRemoveUntil(context, HomeScreen());
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                textStyle: const TextStyle(fontSize: 18),
+              ),
+              child: authViewModel.isLoading
+                  ? const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               )
-            ],
-          ),
+                  : const Text(AppStrings.registerButtonText),
+            ),
+          ],
         ),
       ),
-    );
-  }
-}
-
-
-class _PhoneNumberInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    if (newValue.text.length > 8) return oldValue;
-
-    String newText = newValue.text.replaceAll(RegExp(r'\D'), '');
-
-    final buffer = StringBuffer();
-
-    for (int i = 0; i < newText.length; i++) {
-      buffer.write(newText[i]);
-      if (i == 3 && newText.length > 4) {
-        buffer.write('-');
-      }
-    }
-
-    return newValue.copyWith(
-      text: buffer.toString(),
-      selection: TextSelection.collapsed(offset: buffer.length),
     );
   }
 }
