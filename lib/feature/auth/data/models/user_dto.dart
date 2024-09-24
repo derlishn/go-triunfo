@@ -27,16 +27,16 @@ class UserDTO {
 
   factory UserDTO.fromMap(Map<String, dynamic> data) {
     return UserDTO(
-      uid: data['uid'],
-      email: data['email'],
-      displayName: data['displayName'],
+      uid: data['uid'] ?? '',
+      email: data['email'] ?? '',
+      displayName: data['displayName'] ?? '',
       phoneNumber: data['phoneNumber'],
       address: data['address'],
       photoUrl: data['photoUrl'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
-      role: data['role'],
-      gender: data['gender'],
-      orders: data['orders'],
+      createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      role: data['role'] ?? 'cliente',
+      gender: data['gender'] ?? 'no especificado',
+      orders: data['orders'] ?? 0,
     );
   }
 

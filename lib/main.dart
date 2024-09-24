@@ -42,27 +42,7 @@ class MyApp extends StatelessWidget {
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.system,
-      home: FutureBuilder(
-        future: authViewModel.fetchCurrentUser(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            // Muestra una pantalla de carga mientras se verifica el usuario
-            return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          } else {
-            if (authViewModel.currentUser != null) {
-              // Si el usuario está autenticado, mostrar HomeScreen
-              return HomeScreen();
-            } else {
-              // Si no está autenticado, mostrar WelcomeScreen
-              return const WelcomeScreen();
-            }
-          }
-        },
-      ),
+      home: WelcomeScreen()
     );
   }
 }

@@ -3,9 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:go_triunfo/core/strings/app_strings.dart';
 import 'package:go_triunfo/core/utils/helpers/navigator_helper.dart';
 import 'package:go_triunfo/core/utils/widgets/show_custom_snackbar.dart';
-import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart'; // Importar el paquete
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import '../../../home/presentation/screens/home_screen.dart';
+import '../manager/auth_viewmodel.dart';
 
 class RegisterForm extends StatelessWidget {
   const RegisterForm({Key? key}) : super(key: key);
@@ -37,42 +37,48 @@ class RegisterForm extends StatelessWidget {
             const SizedBox(height: 40),
             // Display Name
             TextField(
-              onChanged: authViewModel.setDisplayName,
+              onChanged: (value) {
+                authViewModel.fields.displayName = value;
+                authViewModel.updateFieldErrors();
+              },
               decoration: InputDecoration(
                 labelText: AppStrings.displayNameHintText,
                 prefixIcon: const Icon(Icons.person),
-                labelStyle: const TextStyle(fontSize: 16),
                 border: const OutlineInputBorder(),
-                errorText: authViewModel.displayNameError,
+                errorText: authViewModel.fields.displayNameError,
               ),
             ),
             const SizedBox(height: 20),
             // Email
             TextField(
-              onChanged: authViewModel.setEmail,
+              onChanged: (value) {
+                authViewModel.fields.email = value;
+                authViewModel.updateFieldErrors();
+              },
               decoration: InputDecoration(
                 labelText: AppStrings.emailHintText,
                 prefixIcon: const Icon(Icons.email),
-                labelStyle: const TextStyle(fontSize: 16),
                 border: const OutlineInputBorder(),
-                errorText: authViewModel.emailError,
+                errorText: authViewModel.fields.emailError,
               ),
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 20),
             // Password
             TextField(
-              onChanged: authViewModel.setPassword,
-              obscureText: !authViewModel.isPasswordVisible,
+              onChanged: (value) {
+                authViewModel.fields.password = value;
+                authViewModel.updateFieldErrors();
+              },
+              obscureText: !authViewModel.fields.isPasswordVisible,
               decoration: InputDecoration(
                 labelText: AppStrings.passwordHintText,
                 prefixIcon: const Icon(Icons.lock),
-                labelStyle: const TextStyle(fontSize: 16),
                 border: const OutlineInputBorder(),
-                errorText: authViewModel.passwordError,
+                errorText: authViewModel.fields.passwordError,
                 suffixIcon: IconButton(
                   icon: Icon(
-                    authViewModel.isPasswordVisible
+                    authViewModel.fields.isPasswordVisible
                         ? Icons.visibility
                         : Icons.visibility_off,
                   ),
@@ -83,62 +89,67 @@ class RegisterForm extends StatelessWidget {
             const SizedBox(height: 20),
             // Confirm Password
             TextField(
-              onChanged: authViewModel.setConfirmPassword,
+              onChanged: (value) {
+                authViewModel.fields.confirmPassword = value;
+                authViewModel.updateFieldErrors();
+              },
               obscureText: true,
               decoration: InputDecoration(
                 labelText: AppStrings.confirmPasswordHintText,
                 prefixIcon: const Icon(Icons.lock),
-                labelStyle: const TextStyle(fontSize: 16),
                 border: const OutlineInputBorder(),
-                errorText: authViewModel.confirmPasswordError,
+                errorText: authViewModel.fields.confirmPasswordError,
               ),
             ),
             const SizedBox(height: 20),
-            // Phone Number
+            // Phone Number (fixed to Honduras +504)
             InternationalPhoneNumberInput(
               onInputChanged: (PhoneNumber number) {
-                authViewModel.setPhoneNumber(number);
+                authViewModel.fields.phoneNumber = number;
+                authViewModel.updateFieldErrors();
               },
               selectorConfig: const SelectorConfig(
                 selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                showFlags: false,
               ),
               ignoreBlank: false,
               autoValidateMode: AutovalidateMode.onUserInteraction,
-              initialValue: PhoneNumber(isoCode: 'PE'),
+              initialValue: PhoneNumber(isoCode: 'HN', dialCode: '+504'),
               textFieldController: phoneController,
               formatInput: true,
               inputDecoration: InputDecoration(
                 labelText: AppStrings.phoneHintText,
                 prefixIcon: const Icon(Icons.phone),
-                labelStyle: const TextStyle(fontSize: 16),
                 border: const OutlineInputBorder(),
-                errorText: authViewModel.phoneNumberError,
+                errorText: authViewModel.fields.phoneNumberError,
               ),
               onSaved: (PhoneNumber number) {},
+              countries: const ['HN'], // Restricción al código de país de Honduras
             ),
             const SizedBox(height: 20),
             // Address
             TextField(
-              onChanged: authViewModel.setAddress,
+              onChanged: (value) {
+                authViewModel.fields.address = value;
+                authViewModel.updateFieldErrors();
+              },
               decoration: InputDecoration(
                 labelText: AppStrings.addressHintText,
                 prefixIcon: const Icon(Icons.location_on),
-                labelStyle: const TextStyle(fontSize: 16),
                 border: const OutlineInputBorder(),
-                errorText: authViewModel.addressError,
+                errorText: authViewModel.fields.addressError,
               ),
               keyboardType: TextInputType.streetAddress,
             ),
             const SizedBox(height: 20),
             // Gender Dropdown
             DropdownButtonFormField<String>(
-              value: authViewModel.gender,
+              value: authViewModel.fields.gender,
               decoration: InputDecoration(
                 labelText: AppStrings.gendertitle,
                 prefixIcon: const Icon(Icons.person_outline),
-                labelStyle: const TextStyle(fontSize: 16),
                 border: const OutlineInputBorder(),
-                errorText: authViewModel.genderError,
+                errorText: authViewModel.fields.genderError,
               ),
               items: [
                 DropdownMenuItem(
@@ -146,7 +157,6 @@ class RegisterForm extends StatelessWidget {
                   child: Text(
                     'No especificado',
                     style: TextStyle(
-                      fontWeight: FontWeight.normal,
                       color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
@@ -156,7 +166,6 @@ class RegisterForm extends StatelessWidget {
                   child: Text(
                     AppStrings.maleGenderText,
                     style: TextStyle(
-                      fontWeight: FontWeight.normal,
                       color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
@@ -166,7 +175,6 @@ class RegisterForm extends StatelessWidget {
                   child: Text(
                     AppStrings.femaleGenderText,
                     style: TextStyle(
-                      fontWeight: FontWeight.normal,
                       color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
@@ -176,13 +184,15 @@ class RegisterForm extends StatelessWidget {
                   child: Text(
                     AppStrings.otherGenderText,
                     style: TextStyle(
-                      fontWeight: FontWeight.normal,
                       color: isDarkMode ? Colors.white : Colors.black,
                     ),
                   ),
                 ),
               ],
-              onChanged: authViewModel.setGender,
+              onChanged: (value) {
+                authViewModel.fields.gender = value!;
+                authViewModel.updateFieldErrors();
+              },
             ),
             const SizedBox(height: 20),
             // Register Button

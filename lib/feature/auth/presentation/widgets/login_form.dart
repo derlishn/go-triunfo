@@ -5,7 +5,8 @@ import 'package:go_triunfo/core/utils/helpers/navigator_helper.dart';
 import 'package:go_triunfo/core/utils/widgets/show_custom_snackbar.dart';
 import 'package:go_triunfo/feature/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:go_triunfo/feature/home/presentation/screens/home_screen.dart';
-import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
+
+import '../manager/auth_viewmodel.dart';
 
 class LoginForm extends StatelessWidget {
   const LoginForm({Key? key}) : super(key: key);
@@ -32,28 +33,34 @@ class LoginForm extends StatelessWidget {
             const SizedBox(height: 40),
             // Email field
             TextField(
-              onChanged: authViewModel.setEmail,
+              onChanged: (value) {
+                authViewModel.fields.email = value;
+                authViewModel.updateFieldErrors(); // Actualizar errores en tiempo real
+              },
               decoration: InputDecoration(
                 labelText: AppStrings.emailHintText,
                 labelStyle: const TextStyle(fontSize: 16),
                 border: const OutlineInputBorder(),
-                errorText: authViewModel.emailError,
+                errorText: authViewModel.fields.emailError, // Mostrar el error del email
               ),
               keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 20),
             // Password field
             TextField(
-              onChanged: authViewModel.setPassword,
-              obscureText: !authViewModel.isPasswordVisible,
+              onChanged: (value) {
+                authViewModel.fields.password = value;
+                authViewModel.updateFieldErrors(); // Actualizar errores en tiempo real
+              },
+              obscureText: !authViewModel.fields.isPasswordVisible,
               decoration: InputDecoration(
                 labelText: AppStrings.passwordHintText,
                 labelStyle: const TextStyle(fontSize: 16),
                 border: const OutlineInputBorder(),
-                errorText: authViewModel.passwordError,
+                errorText: authViewModel.fields.passwordError, // Mostrar el error de la contraseña
                 suffixIcon: IconButton(
                   icon: Icon(
-                    authViewModel.isPasswordVisible
+                    authViewModel.fields.isPasswordVisible
                         ? Icons.visibility
                         : Icons.visibility_off,
                   ),
