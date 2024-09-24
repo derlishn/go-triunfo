@@ -61,11 +61,15 @@ class AuthViewModel extends ChangeNotifier {
     if (userJson != null) {
       final userMap = jsonDecode(userJson);  // Convertir JSON a Map
       final user = UserDTO.fromJson(userMap);  // Convertir Map a UserDTO
+      _currentUser = user;  // Establecer el usuario actual
+      notifyListeners();  // Notificar a los oyentes
       print('Usuario después de cargar de SharedPreferences: $user'); // Debug
       return user;
     }
+
     return null;
   }
+
 
 
   // Eliminar los datos de la sesión en SharedPreferences
@@ -172,6 +176,21 @@ class AuthViewModel extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateUserProfile(UserDTO updatedUser) async {
+    try {
+      // Actualiza los datos en Firebase
+      await _authRepository.updateUser(updatedUser);
+
+      // Actualiza el usuario en la aplicación y guarda en SharedPreferences
+      _currentUser = updatedUser;
+      await saveUserSession(_currentUser!);
+      notifyListeners();
+    } catch (e) {
+      _errorMessage = "Error actualizando el perfil: ${e.toString()}";
       notifyListeners();
     }
   }

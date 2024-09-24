@@ -8,6 +8,10 @@ import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart
 import 'package:go_triunfo/feature/home/presentation/screens/home_screen.dart';
 import 'package:go_triunfo/feature/welcome/presentation/screens/welcome_screen.dart';
 import 'feature/auth/data/models/user_dto.dart';
+import 'feature/business/business_viewmodel.dart';
+import 'feature/categories/presentation/category_viewmodel.dart';
+import 'feature/home/presentation/manager/banner_viewmodel.dart';
+import 'feature/product/presentation/manager/product_viewmodel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +31,20 @@ void main() async {
         ChangeNotifierProvider<AuthViewModel>(
           create: (_) => authViewModel,  // Usamos la instancia ya creada
         ),
+        ChangeNotifierProvider<ProductViewModel>(
+          create: (_) => ProductViewModel(),
+        ),
+        ChangeNotifierProvider<CategoryViewModel>(
+          create: (_) => CategoryViewModel()..fetchCategories(), // Cargar categorías al inicio
+        ),
+        ChangeNotifierProvider<BusinessViewModel>(
+          create: (_) => BusinessViewModel()..fetchBusinesses(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => BannerViewModel()..fetchBanners(),
+          child: HomeScreen(),
+        )
+
       ],
       child: MyApp(user: currentUser),
     ),

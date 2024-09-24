@@ -94,6 +94,14 @@ class AuthRepository {
       }
     });
   }
+  // Función para actualizar los datos del usuario en Firebase
+  Future<void> updateUser(UserDTO userDTO) async {
+    try {
+      await _firestore.collection('users').doc(userDTO.uid).update(userDTO.toMap());
+    } catch (e) {
+      throw Exception('Error actualizando datos del usuario: $e');
+    }
+  }
 }
 
 class AuthErrors {
