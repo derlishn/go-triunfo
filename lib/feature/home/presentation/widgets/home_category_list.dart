@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_triunfo/core/theme/app_colors.dart';
 import 'package:go_triunfo/core/utils/helpers/navigator_helper.dart';
 import 'package:go_triunfo/feature/categories/presentation/screen/category_screen.dart';
 import 'package:provider/provider.dart';
@@ -24,10 +25,10 @@ class HomeCategoryList extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Categorías',
+                  'Busca lo que necesites',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 TextButton(
@@ -38,7 +39,7 @@ class HomeCategoryList extends StatelessWidget {
                     'Ver todas',
                     style: TextStyle(
                       fontSize: 14,
-                      color: Colors.redAccent,
+                      color: AppColors.primaryOrange,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -61,7 +62,7 @@ class HomeCategoryList extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 35,
-                        backgroundColor: Colors.redAccent,
+                        backgroundColor: Colors.grey.withOpacity(0.2),
                         child: Text(
                           category.icon ?? '📦', // Muestra ícono o el ícono por defecto
                           style: TextStyle(fontSize: 28, color: Colors.white),
@@ -70,7 +71,7 @@ class HomeCategoryList extends StatelessWidget {
                       SizedBox(height: 8),
                       Text(
                         category.name,
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                       ), // Mostrar el nombre de la categoría
                     ],
                   ),

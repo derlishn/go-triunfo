@@ -9,6 +9,7 @@ class AppStrings {
   static const String cancelButtonText = "Cancelar";
   static const String successLoggedOut = 'Sesión cerrada exitosamente.';
   static const String operationSuccess = "Operación completada con éxito.";
+  static const String functionIsNotFind = "Aun no disponible";
 
   // Validations
   static const String errorPasswordMismatch = 'Las contraseñas no coinciden.';
