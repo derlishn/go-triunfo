@@ -667,48 +667,49 @@
 			name = Release;
 		};
 		97C147061CF9000F007C117D /* Debug */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				ENABLE_BITCODE = NO;
-				INFOPLIST_FILE = Runner/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.derlisdev.gotriunfo.goTriunfo;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-				VERSIONING_SYSTEM = "apple-generic";
-			};
-			name = Debug;
-		};
+    isa = XCBuildConfiguration;
+    baseConfigurationReference = 5222E2F78C31F52A20A7F8AE /* Pods-Runner.debug.xcconfig */;
+    buildSettings = {
+        ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+        CLANG_ENABLE_MODULES = YES;
+        CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+        ENABLE_BITCODE = NO;
+        INFOPLIST_FILE = Runner/Info.plist;
+        LD_RUNPATH_SEARCH_PATHS = (
+            "$(inherited)",
+            "@executable_path/Frameworks",
+        );
+        PRODUCT_BUNDLE_IDENTIFIER = com.derlisdev.gotriunfo.goTriunfo;
+        PRODUCT_NAME = "$(TARGET_NAME)";
+        SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+        SWIFT_VERSION = 5.0;
+        VERSIONING_SYSTEM = "apple-generic";
+    };
+    name = Debug;
+};
+
 		97C147071CF9000F007C117D /* Release */ = {
-			isa = XCBuildConfiguration;
-			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				ENABLE_BITCODE = NO;
-				INFOPLIST_FILE = Runner/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.derlisdev.gotriunfo.goTriunfo;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
-				SWIFT_VERSION = 5.0;
-				VERSIONING_SYSTEM = "apple-generic";
-			};
-			name = Release;
-		};
+    isa = XCBuildConfiguration;
+    baseConfigurationReference = 652D2309D500D2131347D519 /* Pods-Runner.release.xcconfig */;
+    buildSettings = {
+        ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+        CLANG_ENABLE_MODULES = YES;
+        CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+        ENABLE_BITCODE = NO;
+        INFOPLIST_FILE = Runner/Info.plist;
+        LD_RUNPATH_SEARCH_PATHS = (
+            "$(inherited)",
+            "@executable_path/Frameworks",
+        );
+        PRODUCT_BUNDLE_IDENTIFIER = com.derlisdev.gotriunfo.goTriunfo;
+        PRODUCT_NAME = "$(TARGET_NAME)";
+        SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
+        SWIFT_VERSION = 5.0;
+        VERSIONING_SYSTEM = "apple-generic";
+    };
+    name = Release;
+};
+
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */

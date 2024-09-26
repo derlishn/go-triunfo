@@ -1,5 +1,3 @@
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-
 class AuthFields {
   String email = '';
   String? emailError;
@@ -9,8 +7,8 @@ class AuthFields {
   String? confirmPasswordError;
   String displayName = '';
   String? displayNameError;
-  PhoneNumber? phoneNumber;
-  String? phoneNumberError;
+  String phoneNumber = ''; // Agregado campo para número de teléfono
+  String? phoneNumberError; // Agregado para manejo de errores del número de teléfono
   String address = '';
   String? addressError;
   String gender = 'no especificado';
@@ -28,8 +26,8 @@ class AuthFields {
     confirmPasswordError = null;
     displayName = '';
     displayNameError = null;
-    phoneNumber = null;
-    phoneNumberError = null;
+    phoneNumber = ''; // Limpiar el número de teléfono
+    phoneNumberError = null; // Limpiar el error del número de teléfono
     address = '';
     addressError = null;
     gender = 'no especificado';

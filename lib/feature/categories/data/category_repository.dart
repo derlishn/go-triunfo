@@ -26,8 +26,8 @@ class CategoryRepository {
     }
   }
 
-  // Obtener todas las categorías sin paginación (completa)
-  Future<List<CategoryDTO>> fetchAllCategories() async {
+  // Obtener todas las categorías (sin importar el estado)
+  Future<List<CategoryDTO>> fetchAllCategoriesIncludingInactive() async {
     try {
       final querySnapshot = await _categoriesCollection.get();
       return querySnapshot.docs
@@ -37,6 +37,23 @@ class CategoryRepository {
       throw Exception('Error al cargar todas las categorías: $e');
     }
   }
+
+
+// Obtener solo las categorías activas desde Firebase
+  Future<List<CategoryDTO>> fetchActiveCategories() async {
+    try {
+      final querySnapshot = await _categoriesCollection
+          .where('isActive', isEqualTo: true) // Filtrar por categorías activas
+          .get();
+
+      return querySnapshot.docs
+          .map((doc) => CategoryDTO.fromJson(doc.data() as Map<String, dynamic>, doc.id))
+          .toList();
+    } catch (e) {
+      throw Exception('Error al cargar categorías activas: $e');
+    }
+  }
+
 
   // Añadir una nueva categoría
   Future<void> addCategory(CategoryDTO category) async {

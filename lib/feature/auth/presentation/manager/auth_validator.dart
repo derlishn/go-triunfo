@@ -1,5 +1,3 @@
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-
 class AuthValidator {
   static String? validateEmail(String value) {
     if (value.isEmpty) {
@@ -22,7 +20,8 @@ class AuthValidator {
     return null;
   }
 
-  static String? validateConfirmPassword(String password, String confirmPassword) {
+  static String? validateConfirmPassword(
+      String password, String confirmPassword) {
     if (confirmPassword.isEmpty) {
       return 'Confirma tu contraseña';
     }
@@ -35,13 +34,6 @@ class AuthValidator {
   static String? validateDisplayName(String value) {
     if (value.isEmpty) {
       return 'El nombre es obligatorio';
-    }
-    return null;
-  }
-
-  static String? validatePhoneNumber(PhoneNumber number) {
-    if (number.phoneNumber == null || number.phoneNumber!.isEmpty) {
-      return 'El número de teléfono es obligatorio';
     }
     return null;
   }

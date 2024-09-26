@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:phone_numbers_parser/phone_numbers_parser.dart'; // Importa la librería
 import 'package:go_triunfo/core/strings/app_strings.dart';
 import 'package:go_triunfo/core/utils/helpers/navigator_helper.dart';
 import 'package:go_triunfo/core/utils/widgets/show_custom_snackbar.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../manager/auth_viewmodel.dart';
 
@@ -15,9 +15,6 @@ class RegisterForm extends StatelessWidget {
     final authViewModel = Provider.of<AuthViewModel>(context);
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-
-    // Controlador para el número de teléfono
-    final TextEditingController phoneController = TextEditingController();
 
     return SingleChildScrollView(
       child: Padding(
@@ -103,28 +100,25 @@ class RegisterForm extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             // Phone Number (fixed to Honduras +504)
-            InternationalPhoneNumberInput(
-              onInputChanged: (PhoneNumber number) {
-                authViewModel.fields.phoneNumber = number;
-                authViewModel.updateFieldErrors();
+            TextField(
+              onChanged: (value) {
+                try {
+                  final phoneNumber = PhoneNumber.parse(value, destinationCountry: IsoCode.HN);
+                  authViewModel.fields.phoneNumber = phoneNumber.international; // Formateado
+                  authViewModel.updateFieldErrors();
+                } catch (e) {
+                  authViewModel.fields.phoneNumber = 'Número inválido';
+                  authViewModel.updateFieldErrors();
+                }
               },
-              selectorConfig: const SelectorConfig(
-                selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-                showFlags: false,
-              ),
-              ignoreBlank: false,
-              autoValidateMode: AutovalidateMode.onUserInteraction,
-              initialValue: PhoneNumber(isoCode: 'HN', dialCode: '+504'),
-              textFieldController: phoneController,
-              formatInput: true,
-              inputDecoration: InputDecoration(
-                labelText: AppStrings.phoneHintText,
+              decoration: InputDecoration(
+                labelText: 'Número de Teléfono',
+                prefixText: '+504 ',
                 prefixIcon: const Icon(Icons.phone),
                 border: const OutlineInputBorder(),
                 errorText: authViewModel.fields.phoneNumberError,
               ),
-              onSaved: (PhoneNumber number) {},
-              countries: const ['HN'],
+              keyboardType: TextInputType.phone,
             ),
             const SizedBox(height: 20),
             // Address
@@ -144,7 +138,9 @@ class RegisterForm extends StatelessWidget {
             const SizedBox(height: 20),
             // Gender Dropdown
             DropdownButtonFormField<String>(
-              value: authViewModel.fields.gender.isNotEmpty ? authViewModel.fields.gender : null,
+              value: authViewModel.fields.gender.isNotEmpty
+                  ? authViewModel.fields.gender
+                  : null,
               decoration: InputDecoration(
                 labelText: AppStrings.gendertitle,
                 prefixIcon: const Icon(Icons.person_outline),
@@ -173,9 +169,9 @@ class RegisterForm extends StatelessWidget {
                   ),
                 ),
                 DropdownMenuItem(
-                  value: 'no especificado', // Asegúrate de agregar esta opción
+                  value: 'no especificado',
                   child: Text(
-                    'No especificado', // El texto que quieres mostrar
+                    'No especificado',
                     style: TextStyle(
                       color: isDarkMode ? Colors.white : Colors.black,
                       fontWeight: FontWeight.w400,

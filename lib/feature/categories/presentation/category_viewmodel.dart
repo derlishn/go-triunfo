@@ -6,6 +6,8 @@ import '../data/category_repository.dart';
 class CategoryViewModel extends ChangeNotifier {
   final CategoryRepository _categoryRepository;
 
+
+
   // Estado de carga
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -25,7 +27,10 @@ class CategoryViewModel extends ChangeNotifier {
   DocumentSnapshot? _lastDocument;
 
   CategoryViewModel({CategoryRepository? categoryRepository})
-      : _categoryRepository = categoryRepository ?? CategoryRepository();
+      : _categoryRepository = categoryRepository ?? CategoryRepository() {
+    fetchActiveCategories();
+  }
+
 
   // Obtener categorías con paginación
   Future<void> fetchCategories({int limit = 6}) async {
@@ -60,14 +65,15 @@ class CategoryViewModel extends ChangeNotifier {
     }
   }
 
-  // Obtener todas las categorías (sin paginación)
-  Future<void> fetchAllCategories() async {
+  // Obtener todas las categorías activas (sin paginación)
+  Future<void> fetchActiveCategories() async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      _categories = await _categoryRepository.fetchAllCategories();
+      // Ahora llamamos a `fetchActiveCategories` en lugar de `fetchAllCategories`
+      _categories = await _categoryRepository.fetchActiveCategories();
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -75,6 +81,7 @@ class CategoryViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
 
   // Añadir una nueva categoría
   Future<void> addCategory(String name, {String? icon}) async {
@@ -90,7 +97,7 @@ class CategoryViewModel extends ChangeNotifier {
         isActive: true, // Nueva categoría siempre activa por defecto
       );
       await _categoryRepository.addCategory(newCategory);
-      await fetchAllCategories(); // Refrescar la lista después de añadir
+      await  fetchActiveCategories(); // Refrescar la lista después de añadir
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -107,7 +114,7 @@ class CategoryViewModel extends ChangeNotifier {
 
     try {
       await _categoryRepository.updateCategory(category);
-      await fetchAllCategories();
+      await  fetchActiveCategories();
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -124,7 +131,7 @@ class CategoryViewModel extends ChangeNotifier {
 
     try {
       await _categoryRepository.deleteCategory(categoryId);
-      await fetchAllCategories();
+      await  fetchActiveCategories();
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -133,7 +140,24 @@ class CategoryViewModel extends ChangeNotifier {
     }
   }
 
-  // Activar/Desactivar categoría
+  // Obtener todas las categorías, incluidas las desactivadas
+  Future<void> fetchAllCategoriesIncludingInactive() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      _categories = await _categoryRepository.fetchAllCategoriesIncludingInactive();
+    } catch (e) {
+      _errorMessage = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+
+  // Activar/Desactivar categoría y recargar solo categorías activas
   Future<void> toggleCategoryStatus(String categoryId, bool isActive) async {
     _isLoading = true;
     _errorMessage = null;
@@ -141,7 +165,7 @@ class CategoryViewModel extends ChangeNotifier {
 
     try {
       await _categoryRepository.toggleCategoryStatus(categoryId, isActive);
-      await fetchAllCategories(); // Refrescar la lista después de cambiar estado
+      await fetchActiveCategories();
     } catch (e) {
       _errorMessage = e.toString();
     } finally {
@@ -149,6 +173,7 @@ class CategoryViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
 
   // Método para restablecer el mensaje de error
   void clearErrorMessage() {

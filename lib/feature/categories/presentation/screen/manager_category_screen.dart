@@ -4,7 +4,20 @@ import '../category_viewmodel.dart';
 import '../widgets/add_category_dialog.dart';
 import '../widgets/edit_category_dialog.dart';
 
-class ManagerCategoriesScreen extends StatelessWidget {
+class ManagerCategoriesScreen extends StatefulWidget {
+  @override
+  _ManagerCategoriesScreenState createState() => _ManagerCategoriesScreenState();
+}
+
+class _ManagerCategoriesScreenState extends State<ManagerCategoriesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Cargar todas las categorías, incluidas las inactivas, al iniciar
+    final categoryViewModel = Provider.of<CategoryViewModel>(context, listen: false);
+    categoryViewModel.fetchAllCategoriesIncludingInactive();
+  }
+
   @override
   Widget build(BuildContext context) {
     final categoryViewModel = Provider.of<CategoryViewModel>(context);
@@ -16,7 +29,6 @@ class ManagerCategoriesScreen extends StatelessWidget {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              // Mostrar el diálogo para agregar nueva categoría
               showDialog(
                 context: context,
                 builder: (context) => AddCategoryDialog(),
@@ -50,12 +62,13 @@ class ManagerCategoriesScreen extends StatelessWidget {
                   onChanged: (value) {
                     categoryViewModel.toggleCategoryStatus(
                         category.id, value);
+                    categoryViewModel.fetchAllCategoriesIncludingInactive();
                   },
+
                 ),
                 IconButton(
                   icon: Icon(Icons.edit),
                   onPressed: () {
-                    // Mostrar diálogo para editar la categoría
                     showDialog(
                       context: context,
                       builder: (context) =>
@@ -77,7 +90,6 @@ class ManagerCategoriesScreen extends StatelessWidget {
     );
   }
 
-  // Confirmar eliminación de categoría
   void _confirmDelete(BuildContext context, CategoryViewModel viewModel, String categoryId) {
     showDialog(
       context: context,

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:go_triunfo/feature/business/business_list_screen.dart';
+import 'package:go_triunfo/feature/business/manager_business_screen.dart';
 import 'package:go_triunfo/feature/home/presentation/widgets/manager_banner_screen.dart';
+import 'package:go_triunfo/feature/welcome/presentation/screens/welcome_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:go_triunfo/feature/auth/presentation/manager/auth_viewmodel.dart';
 import 'package:go_triunfo/core/utils/helpers/navigator_helper.dart';
 import '../../../feature/categories/presentation/screen/manager_category_screen.dart';
 import '../../../feature/home/presentation/screens/home_screen.dart';
-import '../../../feature/profile/presentations/screens/profile_screen.dart'; // Asegúrate de que el helper esté bien ubicado
+import '../../../feature/profile/presentations/screens/profile_screen.dart';
 
 class DrawerMenu extends StatelessWidget {
   @override
@@ -35,7 +36,6 @@ class DrawerMenu extends StatelessWidget {
             leading: Icon(Icons.home),
             title: Text('Inicio'),
             onTap: () {
-              // Reemplazar la pantalla actual con la pantalla Home y limpiar la pila si es necesario
               replaceWith(context, HomeScreen());
             },
           ),
@@ -43,7 +43,6 @@ class DrawerMenu extends StatelessWidget {
             leading: Icon(Icons.person),
             title: Text('Perfil'),
             onTap: () {
-              // Utilizar 'navigateTo' para que el usuario pueda volver a la pantalla anterior
               navigateTo(context, ProfileScreen());
             },
           ),
@@ -51,7 +50,6 @@ class DrawerMenu extends StatelessWidget {
             leading: Icon(Icons.bookmark_add),
             title: Text('Banners'),
             onTap: () {
-              // Utilizar 'navigateTo' para que el usuario pueda volver a la pantalla anterior
               navigateTo(context, ManagerBannersScreen());
             },
           ),
@@ -59,7 +57,6 @@ class DrawerMenu extends StatelessWidget {
             leading: Icon(Icons.category),
             title: Text('Categorías'),
             onTap: () {
-              // Utilizar 'replaceWith' para evitar que la pila crezca
               navigateTo(context, ManagerCategoriesScreen());
             },
           ),
@@ -67,8 +64,29 @@ class DrawerMenu extends StatelessWidget {
             leading: Icon(Icons.store),
             title: Text('Negocios'),
             onTap: () {
-              // Utilizar 'navigateTo' para que el usuario pueda regresar
-              navigateTo(context, BusinessListScreen());
+              navigateTo(context, ManagerBusinessScreen());
+            },
+          ),
+          Expanded(child: Text(""),),
+          Expanded(child: Text(""),),
+          Expanded(child: Text(""),),
+          Expanded(child: Text(""),),
+          Expanded(child: Text(""),),
+          Expanded(child: Text(""),),
+          Divider(), // Línea divisoria para separar el contenido principal del área de configuración y logout
+          ListTile(
+            leading: Icon(Icons.settings),
+            title: Text('Configuración'),
+            onTap: () {
+              // Aquí podrías navegar a una pantalla de configuración si la tienes
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.logout),
+            title: Text('Cerrar sesión'),
+            onTap: () async {
+              await authViewModel.signOut();
+              replaceAndRemoveUntil(context, WelcomeScreen());
             },
           ),
         ],
